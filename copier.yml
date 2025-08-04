@@ -16,39 +16,39 @@ _template:
 ## Variables presented to the user when running `copier copy`
 project_name:
   type: str
-  default: "My Awesome App"
+  default: "MeatyPrompts"
   help: "Human‑readable project name (used in README)"
 
 package_name_py:
   type: str
-  default: "api"
+  default: "meatyprompts"
   help: "Python package name for the FastAPI service"
 
 bundle_id:
   type: str
-  default: "com.example.myapp"
+  default: "cloud.meaty.meatyprompts"
   help: "Application bundle identifier (reverse‑DNS)"
 
 com_org:
   type: str
-  default: "example"
+  default: "MeatyMedia"
   help: "Organisation/company name used in bundle IDs"
 
 use_web:
   type: bool
-  default: false
+  default: true
   help: "Include a Next.js web app?"
 
 db:
-  type: choice
+  type: str
   choices:
     - sqlite
     - postgres
-  default: sqlite
+  default: postgres
   help: "Select the database backend for production"
 
 auth:
-  type: choice
+  type: str
   choices:
     - none
     - auth0
@@ -62,7 +62,7 @@ license:
   help: "License identifier for your project"
 
 ci_cd:
-  type: choice
+  type: str
   choices:
     - basic
     - full
