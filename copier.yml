@@ -1,0 +1,75 @@
+_template:
+  # A descriptive name for this template
+  name: "React Native + FastAPI Monorepo Template"
+  # Files/directories that should not be copied to the rendered project
+  exclude:
+    - .git
+    - node_modules
+    - services/api/.venv
+  # Files/directories that should be rendered even though they are excluded by
+  # default patterns (e.g. dotfiles)
+  include:
+    - ".github"
+    - ".pre-commit-config.yaml"
+    - ".editorconfig"
+
+## Variables presented to the user when running `copier copy`
+project_name:
+  type: str
+  default: "My Awesome App"
+  help: "Human‑readable project name (used in README)"
+
+package_name_py:
+  type: str
+  default: "api"
+  help: "Python package name for the FastAPI service"
+
+bundle_id:
+  type: str
+  default: "com.example.myapp"
+  help: "Application bundle identifier (reverse‑DNS)"
+
+com_org:
+  type: str
+  default: "example"
+  help: "Organisation/company name used in bundle IDs"
+
+use_web:
+  type: bool
+  default: false
+  help: "Include a Next.js web app?"
+
+db:
+  type: choice
+  choices:
+    - sqlite
+    - postgres
+  default: sqlite
+  help: "Select the database backend for production"
+
+auth:
+  type: choice
+  choices:
+    - none
+    - auth0
+    - cognito
+  default: none
+  help: "Authentication provider for your app"
+
+license:
+  type: str
+  default: "MIT"
+  help: "License identifier for your project"
+
+ci_cd:
+  type: choice
+  choices:
+    - basic
+    - full
+  default: basic
+  help: "CI/CD pipeline level (basic: lint+test+build, full: includes optional CD stubs)"
+
+_post:
+  # Run verification script after copying into new project directory.
+  # This ensures the generated project passes all quality gates.
+  - scripts/verify.sh

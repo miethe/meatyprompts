@@ -1,0 +1,1 @@
+This directory contains database migration scripts managed by Alembic.  It is currently empty; run `alembic init` within `services/api` to bootstrap migrations.

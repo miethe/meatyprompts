@@ -1,0 +1,1 @@
+Put custom React hooks in this directory.  Hooks should encapsulate logic that can be shared across multiple components (e.g. API calls, theme toggles).

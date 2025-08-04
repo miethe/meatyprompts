@@ -1,0 +1,11 @@
+{
+  "extends": "../../packages/tsconfig.base.json",
+  "compilerOptions": {
+    "jsx": "react",
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
+    "types": ["jest", "react-native"],
+    "skipLibCheck": true
+  },
+  "include": ["src/**/*"]
+}

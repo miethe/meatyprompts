@@ -1,0 +1,1 @@
+Screen components (pages or routes) live in this directory.  Each screen should be its own file or folder depending on complexity.
