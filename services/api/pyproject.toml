@@ -12,5 +12,31 @@ dependencies = [
 ]
 
 [tool.ruff]
-line-length = 100
-select = ["E", "F", "I", "UP", "B", "SIM", "PL"]
+# Adopt stricter rules inspired by Daily Joe's configuration
+line-length = 88
+select = [
+  "E",  # pycodestyle
+  "W",  # pycodestyle warnings
+  "F",  # pyflakes
+  "I",  # isort
+  "UP", # pyupgrade
+  "B",  # flake8-bugbear
+  "SIM",# flake8-simplify
+  "PL", # pylint
+  "C",  # McCabe complexity
+  "ANN",# flake8-annotations
+  "ASYNC", # flake8-async
+  "S",  # bandit security rules
+  "PTH",# flake8-use-pathlib
+  "TRY",# tryceratops
+  "RUF" # Ruff specific rules
+]
+ignore = ["ANN101", "ANN102", "ANN204", "ANN401", "S101"]
+target-version = "py311"
+
+[tool.mypy]
+python_version = "3.11"
+warn_return_any = true
+warn_unused_configs = true
+ignore_missing_imports = true
+exclude = ["alembic/"]

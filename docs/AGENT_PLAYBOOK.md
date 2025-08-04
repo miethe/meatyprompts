@@ -7,18 +7,26 @@ artefacts.
 
 ## Responsibilities
 
-1. **Generate specifications**:  Use the templates in `docs/TEMPLATES` to
-   produce Product Requirement Documents (PRDs), User Stories, and
-   Implementation Plans based on high‑level ideas.  Follow the prompts
-   included in `docs/PROMPTS_LIBRARY.md`.
-2. **Maintain quality**:  Ensure that any generated code or documentation
-   adheres to the linting and type checking requirements.  Run
-   `scripts/verify.sh` before opening a pull request.
-3. **Document assumptions**:  If information is missing, list your
+Agents contributing to this template should adhere to the following
+principles (inspired by the Daily Joe agent guide【380388811125184†L82-L91】):
+
+1. **Spec‑first**:  Always request a clear specification before generating
+   code or documentation.  Use the templates in `docs/TEMPLATES` to produce
+   PRDs, user stories, implementation plans, and ADRs.  Follow the prompts
+   in `docs/PROMPTS_LIBRARY.md`.
+2. **Modular & Idempotent**:  Keep code modular (e.g. use repository and
+   service layers) and ensure operations are idempotent wherever possible.
+3. **Structured logging & error handling**:  Include structured logs and
+   robust error handling in generated code.
+4. **Test coverage**:  Provide unit tests for new features and verify
+   that all CI checks pass by running `scripts/verify.sh` locally.
+5. **Secret hygiene**:  Never hard‑code secrets.  Use environment variables
+   and document how to configure them.
+6. **Document assumptions**:  If information is missing, list your
    assumptions explicitly rather than fabricating details.
-4. **Cite sources**:  When reusing assets from external repositories (e.g.
-   Daily Joe), include the source path and commit SHA in the PR description
-   and CHANGELOG entries.
+7. **Cite sources**:  When reusing assets from external repositories
+   (e.g. Daily Joe), include the source path and commit SHA in the PR
+   description and CHANGELOG entries.
 
 ## Workflow
 
