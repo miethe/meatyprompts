@@ -13,19 +13,15 @@ const Sidebar = () => {
         <nav>
           <ul>
             <li>
-              <Link href="/dashboard">
-                <a className="flex items-center h-10 px-3 text-gray-300 rounded hover:bg-gray-700">
-                  <span className="mr-2">📊</span>
-                  {!isCollapsed && 'Dashboard'}
-                </a>
+              <Link href="/dashboard" className="flex items-center h-10 px-3 text-gray-300 rounded hover:bg-gray-700">
+                <span className="mr-2">📊</span>
+                {!isCollapsed && 'Dashboard'}
               </Link>
             </li>
             <li>
-              <Link href="/prompts">
-                <a className="flex items-center h-10 px-3 text-gray-300 rounded hover:bg-gray-700">
-                  <span className="mr-2">💡</span>
-                  {!isCollapsed && 'Prompts'}
-                </a>
+              <Link href="/prompts" className="flex items-center h-10 px-3 text-gray-300 rounded hover:bg-gray-700">
+                <span className="mr-2">💡</span>
+                {!isCollapsed && 'Prompts'}
               </Link>
             </li>
           </ul>

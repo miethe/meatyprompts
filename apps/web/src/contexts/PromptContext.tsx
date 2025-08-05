@@ -1,4 +1,4 @@
-import { createContext, useReducer, useEffect, FC } from 'react';
+import { createContext, useReducer, useEffect, FC, ReactNode } from 'react';
 import { fetchPrompts } from '@/lib/api/fetchPrompts';
 import { Prompt } from '@/types/Prompt';
 
@@ -9,6 +9,10 @@ interface PromptState {
 interface PromptAction {
   type: 'LOAD';
   payload: Prompt[];
+}
+
+interface PromptProviderProps {
+  children: ReactNode;
 }
 
 export const PromptContext = createContext<{
@@ -25,7 +29,7 @@ function promptReducer(state: PromptState, action: PromptAction): PromptState {
   }
 }
 
-export const PromptProvider: FC = ({ children }) => {
+export const PromptProvider: FC<PromptProviderProps> = ({ children }) => {
   const [state, dispatch] = useReducer(promptReducer, { prompts: [] });
 
   useEffect(() => {

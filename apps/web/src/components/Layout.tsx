@@ -3,7 +3,7 @@ import Sidebar from './Sidebar';
 
 const Layout = ({ children }) => {
   return (
-    <div className="flex h-screen bg-gray-100">
+    <div className="flex h-screen bg-blend-darken">
       <Sidebar />
       <div className="flex-grow p-6">{children}</div>
     </div>

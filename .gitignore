@@ -1,12 +1,14 @@
 # Dependencies
 /node_modules
 /.pnpm-store
-/build
-/dist
-/.next
+**/build
+**/dist
+**/.next
+**/.expo
+**/__pycache__
 
 # Logs
-logs
+**/logs
 *.log
 npm-debug.log*
 yarn-debug.log*
@@ -14,10 +16,8 @@ yarn-error.log*
 lerna-debug.log*
 
 # Other
-.DS_Store
+**/.DS_Store
 .env.local
 .env.development.local
 .env.test.local
 .env.production.local
-apps/web/.next
-apps/mobile/.expo
