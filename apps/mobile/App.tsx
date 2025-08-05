@@ -1,18 +1,14 @@
-import 'react-native-reanimated';
 import 'react-native-gesture-handler';
+import { Slot } from 'expo-router';
 import React from 'react';
-import { NavigationContainer } from '@react-navigation/native';
-import { PromptProvider } from './src/state/PromptContext';
-import AppNavigator from './src/navigation/AppNavigator';
 import { PaperProvider, MD3DarkTheme } from 'react-native-paper';
+import { PromptProvider } from './src/state/PromptContext';
 
 export default function App() {
   return (
     <PaperProvider theme={MD3DarkTheme}>
       <PromptProvider>
-        <NavigationContainer>
-          <AppNavigator />
-        </NavigationContainer>
+        <Slot />
       </PromptProvider>
     </PaperProvider>
   );
