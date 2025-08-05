@@ -22,7 +22,7 @@ const promptReducer = (state: PromptState, action: PromptAction): PromptState =>
   }
 };
 
-export const PromptProvider: FC = ({ children }) => {
+export const PromptProvider: FC<{ children: React.ReactNode }> = ({ children }) => {
   const [state, dispatch] = useReducer(promptReducer, { prompts: [] });
 
   useEffect(() => {

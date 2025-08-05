@@ -4,9 +4,9 @@
     "slug": "{{ package_name_py }}-mobile",
     "version": "0.1.0",
     "platforms": ["ios", "android"],
-    "jsEngine": "hermes",
+    "jsEngine": "jsc",
     "orientation": "portrait",
-    "icon": "./assets/icon.png",
+    "icon": "./assets/images/icon.png",
     "splash": {
       "image": "./assets/splash.png",
       "resizeMode": "contain",
@@ -22,11 +22,6 @@
         "backgroundColor": "#FFFFFF"
       },
       "package": "{{ bundle_id }}"
-    },
-    "extra": {
-      "eas": {
-        "projectId": "00000000-0000-0000-0000-000000000000"
-      }
     }
   }
 }
