@@ -11,6 +11,9 @@ dependencies = [
   "httpx>=0.27"
 ]
 
+[tool.setuptools.packages.find]
+where = ["app"]
+
 [tool.ruff]
 # Adopt stricter rules inspired by Daily Joe's configuration
 line-length = 88

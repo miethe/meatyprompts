@@ -27,6 +27,9 @@ def create_app() -> FastAPI:
         """Simple health check endpoint."""
         return {"status": "ok"}
 
+    from app.api import prompts
+    app.include_router(prompts.router, prefix="/api/v1")
+
     return app
 
 
