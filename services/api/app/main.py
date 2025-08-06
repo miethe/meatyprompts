@@ -28,7 +28,9 @@ def create_app() -> FastAPI:
         return {"status": "ok"}
 
     from app.api import prompts
+    from app.api.endpoints import lookups
     app.include_router(prompts.router, prefix="/api/v1")
+    app.include_router(lookups.router, prefix="/api/v1/lookups", tags=["lookups"])
 
     return app
 

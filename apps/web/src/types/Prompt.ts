@@ -1,8 +1,9 @@
 export interface Prompt {
   id: string;
   title: string;
-  purpose?: string;
+  purpose?: string[];
   models: string[];
+  platforms?: string[];
   tools?: string[];
   tags?: string[];
   body: string;
