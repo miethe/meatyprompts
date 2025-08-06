@@ -31,6 +31,22 @@ This repository serves as a **template** for bootstrapping new mobile and web ap
 
 Refer to `docs/DEVELOPER_GUIDE.md` for detailed environment setup and commands.
 
+## Prompt Metadata Spec
+
+The prompts service supports a rich set of governance fields to aid in
+discovery and reuse.  Each prompt captures:
+
+* **title** – human friendly name.
+* **body** – the prompt text.
+* **use_cases** – list describing intended scenarios.
+* **access_control** – one of `public`, `private`, `team-only`, or
+  `role-based`.
+* Optional details such as target models, providers, integrations,
+  audience, input/output samples and related prompt links.
+
+Timestamps for creation and last modification are managed by the
+database.  See the OpenAPI docs for the full schema.
+
 ## License
 
 This template is provided under the terms of the [MIT License](LICENSE).  See the `LICENSE` file for details.

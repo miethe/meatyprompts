@@ -9,3 +9,4 @@ and this project adheres to [Semantic Versioning](https://semver.org).
 
 ### Added
 - Initial skeleton structure for React Native + FastAPI monorepo template.
+- MP-PMT-002: expanded prompt metadata model, CRUD APIs and UI scaffolding.

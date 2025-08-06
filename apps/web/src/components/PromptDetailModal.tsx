@@ -9,13 +9,14 @@ import {
 } from './ui/dialog'; // Assuming shadcn dialog is in ui/dialog
 import { Button } from './ui/button'; // Assuming shadcn button is in ui/button
 
-// This is a placeholder for the actual Prompt data type
+// Simplified Prompt type used by this component
 interface Prompt {
   title: string;
-  purpose: string[];
-  models: string[];
-  platforms: string[];
   body: string;
+  sample_input?: Record<string, unknown>;
+  sample_output?: Record<string, unknown>;
+  related_prompt_ids?: string[];
+  link?: string;
 }
 
 interface PromptDetailModalProps {
@@ -71,7 +72,73 @@ const PromptDetailModal: React.FC<PromptDetailModalProps> = ({ prompt, isOpen, o
             )}
           </div>
 
-          {/* Add other fields here (Purpose, Models, Platforms) in a similar fashion */}
+          {/* Sample Input */}
+          <div className="grid grid-cols-4 items-start gap-4">
+            <label htmlFor="sample_input" className="text-right mt-2">Sample Input</label>
+            {isEditing ? (
+              <textarea
+                id="sample_input"
+                value={JSON.stringify(editedPrompt.sample_input ?? {}, null, 2)}
+                onChange={(e) =>
+                  setEditedPrompt({
+                    ...editedPrompt,
+                    sample_input: JSON.parse(e.target.value || '{}'),
+                  })
+                }
+                className="col-span-3 p-2 border rounded h-24"
+              />
+            ) : (
+              <pre className="col-span-3 whitespace-pre-wrap text-sm">
+                {JSON.stringify(prompt.sample_input, null, 2)}
+              </pre>
+            )}
+          </div>
+
+          {/* Sample Output */}
+          <div className="grid grid-cols-4 items-start gap-4">
+            <label htmlFor="sample_output" className="text-right mt-2">Sample Output</label>
+            {isEditing ? (
+              <textarea
+                id="sample_output"
+                value={JSON.stringify(editedPrompt.sample_output ?? {}, null, 2)}
+                onChange={(e) =>
+                  setEditedPrompt({
+                    ...editedPrompt,
+                    sample_output: JSON.parse(e.target.value || '{}'),
+                  })
+                }
+                className="col-span-3 p-2 border rounded h-24"
+              />
+            ) : (
+              <pre className="col-span-3 whitespace-pre-wrap text-sm">
+                {JSON.stringify(prompt.sample_output, null, 2)}
+              </pre>
+            )}
+          </div>
+
+          {/* Related Prompts */}
+          {prompt.related_prompt_ids && (
+            <div className="grid grid-cols-4 items-center gap-4">
+              <span className="text-right">Related</span>
+              <div className="col-span-3 flex flex-col space-y-1">
+                {prompt.related_prompt_ids.map((id) => (
+                  <a key={id} href={`/prompts/${id}`} className="text-blue-500 underline">
+                    {id}
+                  </a>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* External Link */}
+          {prompt.link && (
+            <div className="grid grid-cols-4 items-center gap-4">
+              <span className="text-right">Link</span>
+              <a href={prompt.link} className="col-span-3 text-blue-500 underline">
+                {prompt.link}
+              </a>
+            </div>
+          )}
 
         </div>
 

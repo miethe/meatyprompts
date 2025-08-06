@@ -2,7 +2,7 @@ import axios from 'axios';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 
-type LookupType = 'models' | 'tools' | 'platforms' | 'purposes';
+type LookupType = 'target_models' | 'providers' | 'integrations' | 'use_cases';
 
 interface Lookup {
   id: string;

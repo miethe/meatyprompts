@@ -4,12 +4,8 @@ import React from 'react';
 interface Prompt {
   title: string;
   body: string;
-  version: number;
+  version: string;
   tags?: string[];
-  purpose?: string[];
-  models?: string[];
-  tools?: string[];
-  platforms?: string[];
 }
 
 interface PromptCardProps {
@@ -24,13 +20,7 @@ const Tag: React.FC<{ children: React.ReactNode }> = ({ children }) => (
 );
 
 const PromptCard: React.FC<PromptCardProps> = ({ prompt, onClick }) => {
-  const allTags = [
-    ...(prompt.purpose || []),
-    ...(prompt.models || []),
-    ...(prompt.tools || []),
-    ...(prompt.platforms || []),
-    ...(prompt.tags || [])
-  ];
+  const allTags = prompt.tags || [];
 
   return (
     <div
