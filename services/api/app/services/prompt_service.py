@@ -38,15 +38,17 @@ def create_prompt(db: Session, prompt: PromptCreate):
     db.commit()
 
     # Return Pydantic model for serialization
+    def clean_array(arr):
+        return [x for x in arr if x is not None]
     return PromptVersion(
         id=prompt_version_orm.id,
         prompt_id=prompt_version_orm.prompt_id,
         version=prompt_version_orm.version,
         title=prompt_version_orm.title,
-        purpose=prompt_version_orm.purpose,
-        models=prompt_version_orm.models,
-        tools=prompt_version_orm.tools if prompt_version_orm.tools else [],
-        tags=prompt_version_orm.tags if prompt_version_orm.tags else [],
+        purpose=clean_array(prompt_version_orm.purpose) if prompt_version_orm.purpose else [],
+        models=clean_array(prompt_version_orm.models) if prompt_version_orm.models else [],
+        tools=clean_array(prompt_version_orm.tools) if prompt_version_orm.tools else [],
+        tags=clean_array(prompt_version_orm.tags) if prompt_version_orm.tags else [],
         body=prompt_version_orm.body,
         visibility=prompt_version_orm.visibility,
         created_at=prompt_version_orm.created_at,
@@ -62,10 +64,25 @@ def list_prompts(db: Session, model: str = None, tool: str = None, purpose: str 
     if purpose:
         query = query.filter(PromptVersionORM.purpose.any(purpose))
 
-    # This is a simplified list function. A real implementation would need to handle
-    # fetching only the latest version of each prompt, pagination, etc.
-    # For now, it returns all versions matching the filter.
-    return query.order_by(PromptVersionORM.created_at.desc()).all()
+    def clean_array(arr):
+        return [x for x in arr if x is not None]
+
+    def serialize_prompt_version(orm_obj):
+        return PromptVersion(
+            id=orm_obj.id,
+            prompt_id=orm_obj.prompt_id,
+            version=orm_obj.version,
+            title=orm_obj.title,
+            purpose=clean_array(orm_obj.purpose) if orm_obj.purpose else [],
+            models=clean_array(orm_obj.models) if orm_obj.models else [],
+            tools=clean_array(orm_obj.tools) if orm_obj.tools else [],
+            tags=clean_array(orm_obj.tags) if orm_obj.tags else [],
+            body=orm_obj.body,
+            visibility=orm_obj.visibility,
+            created_at=orm_obj.created_at,
+        )
+
+    return [serialize_prompt_version(obj) for obj in query.order_by(PromptVersionORM.created_at.desc()).all()]
 
 
 def update_prompt(db: Session, prompt_id: uuid.UUID, prompt_update: PromptCreate):

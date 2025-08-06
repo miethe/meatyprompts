@@ -6,6 +6,7 @@ import { ManualPromptInput } from '@/types/Prompt';
 import { usePrompt } from '@/contexts/PromptContext';
 import CreatableMultiSelect from '../form/CreatableMultiSelect';
 import TagInput from '../form/TagInput';
+import { useLookups } from '@/contexts/LookupContext';
 
 const schema = z.object({
   title: z.string().min(1, 'Title is required'),
@@ -41,9 +42,13 @@ const ManualPromptForm = ({ onClose }) => {
 
   const onSubmit = async (data: ManualPromptInput) => {
     console.log('ManualPromptForm submitted:', data);
-    // This will now pass the correct data structure to the context/API
-    // await createPrompt(data);
-    onClose();
+    try {
+      await createPrompt(data);
+      onClose();
+    } catch (error) {
+      console.error('Failed to create prompt:', error);
+      // Optionally show error to user
+    }
   };
 
   const handleCreateOption = (type: 'models' | 'tools' | 'platforms' | 'purposes') => (inputValue: string) => {
@@ -129,7 +134,7 @@ const ManualPromptForm = ({ onClose }) => {
       <div>
         <label htmlFor="tags" className="block text-sm font-medium text-gray-700">Tags</label>
         <Controller name="tags" control={control} render={({ field }) => (
-            <TagInput tags={field.value?.map(t => ({id: t, text: t})) || []} setTags={(newTags) => field.onChange(newTags.map(t => t.text))} placeholder="Add tags..." />
+            <TagInput tags={field.value?.map(t => ({id: t, text: t, className: ''})) || []} setTags={(newTags) => field.onChange(newTags.map(t => t.text))} placeholder="Add tags..." />
         )} />
         {errors.tags && <p className="text-red-500">{errors.tags.message}</p>}
       </div>
@@ -143,8 +148,8 @@ const ManualPromptForm = ({ onClose }) => {
           {...register('visibility')}
           className="block w-full mt-1 text-black border-gray-300 rounded-md shadow-md"
         >
-          <option value="private">Private</option>
           <option value="public">Public</option>
+          <option value="private">Private</option>
           <option value="team">Team</option>
         </select>
         {errors.visibility && <p className="text-red-500">{errors.visibility.message}</p>}

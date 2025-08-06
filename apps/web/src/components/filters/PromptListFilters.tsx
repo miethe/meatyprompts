@@ -37,7 +37,7 @@ const PromptListFilters: React.FC = () => {
   return (
     <Sheet>
       <SheetTrigger asChild>
-        <Button variant="outline">Filters</Button>
+        <Button variant="outline" className="text-black">Filters</Button>
       </SheetTrigger>
       <SheetContent>
         <SheetHeader>

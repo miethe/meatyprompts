@@ -75,7 +75,7 @@ const TagInput: React.FC<TagInputProps> = ({ tags, setTags, placeholder }) => {
         autocomplete
         placeholder={placeholder}
         classNames={{
-          tags: 'flex flex-wrap gap-2',
+          tags: 'flex flex-wrap gap-2 text-gray-800',
           tag: 'bg-gray-200 text-gray-800 text-sm font-medium me-2 px-2.5 py-0.5 rounded flex items-center gap-1',
           remove: 'cursor-pointer',
           tagInputField: 'mt-2 w-full p-2 border border-gray-300 rounded',

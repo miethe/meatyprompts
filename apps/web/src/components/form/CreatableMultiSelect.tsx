@@ -33,6 +33,7 @@ const CreatableMultiSelect: React.FC<CreatableMultiSelectProps> = ({
       onCreateOption={onCreateOption}
       isLoading={isLoading}
       placeholder={placeholder}
+      className='text-black'
       // You can further customize styles here using the `styles` prop
       // and Tailwind CSS classes via the `className` and `classNamePrefix` props
       // For example:
