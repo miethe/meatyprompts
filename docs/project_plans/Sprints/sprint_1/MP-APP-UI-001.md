@@ -1,153 +1,148 @@
-# User Story MP-APP-UI-001 — **Mobile App Foundation (Sidebar + Dashboard + Prompts + Wizard)**
+# **User Story WP-APP-UI-001 — Web App Foundation (Sidebar + Dashboard + Prompts + Wizard)**
 
-> **Epic:** **APP** — Mobile Application Core
-> **As a** mobile MeatyPrompts user, **I want** a collapsible sidebar with Dashboard and Prompts screens and a “+” button that opens a Prompt Wizard, **so that** I can intuitively browse, create and manage prompts from day one.
+**Epic:** APP — Web Application Core
 
----
-
-## 1 · Narrative
-
-*As a* **content-creator on the go**, *I want* an **elegant, dark-themed mobile shell** with core screens (Dashboard, Prompts) and a **Prompt Wizard** launched from a floating action button, *so that* **I immediately understand where to see existing prompts and how to create a new one, while the team can easily extend the app later**.
+As a MeatyPrompts web user, I want a collapsible sidebar with Dashboard and Prompts pages and a “+” button that opens a Prompt Wizard, so that I can intuitively browse, create and manage prompts from my browser.
 
 ---
 
-## 2 · Acceptance Criteria
+**1 · Narrative**
 
-| # | Behaviour / Scenario                                               | Measure / Test (RTL / Detox)                                     |
-| - | ------------------------------------------------------------------ | ---------------------------------------------------------------- |
-| 1 | Collapsible Drawer renders logo & routes (Dashboard, Prompts)      | Drawer exists; tapping item navigates & highlights active route  |
-| 2 | Drawer remains functional in portrait & landscape                  | Responsive snapshot comparison                                   |
-| 3 | Dashboard shows placeholder + centered floating “+” (FAB)          | FAB visible; press event opens PromptWizard modal                |
-| 4 | Prompts screen lists prompt cards when data present                | Fetch stub returns >0 ⇒ `<PromptCard>` count matches data length |
-| 5 | Prompts screen shows empty-state placeholder when no data          | Fetch stub returns \[]; placeholder text rendered                |
-| 6 | Prompt Wizard modal includes Model dropdown, Task picker, Next CTA | Form fields render; selection values stored in local state       |
-| 7 | Dark theme applied globally; future light mode toggle stubbed      | Snapshot includes expected color tokens                          |
-| 8 | Navigation stack passes ESLint/TypeScript checks                   | CI job passes                                                    |
+As a content-creator at my desk, I want an elegant, dark-themed web interface with core pages (Dashboard, Prompts) and a Prompt Wizard launched from a primary button, so that I immediately understand where to see existing prompts and how to create a new one, while the team can easily extend the app later.
 
 ---
 
-## 3 · Context & Dependencies
+**2 · Acceptance Criteria**
 
-* **Depends on:**
-
-  * `MP-APP-CHD-000` – Repository bootstrap (Expo/TypeScript, ESLint, Jest)
-  * Draft Figma mockups (attached)
-
-* **Forward hooks / future features:**
-
-  * `MP-AUTH-SEC-001` – Auth guard on routes
-  * `MP-PRM-API-002` – Real prompt CRUD API integration
-  * `MP-APP-UI-003` – Light-mode theme & system toggle
-  * `Sprint X` – Analytics instrumentation for navigation events
+| # | Behaviour / Scenario | Measure / Test (RTL / Cypress) |
+| :--- | :--- | :--- |
+| 1 | Collapsible Sidebar renders logo & links (Dashboard, Prompts) | Sidebar exists; clicking a link navigates to the correct page & highlights the active link. |
+| 2 | Sidebar is responsive and adapts to viewport size | The sidebar collapses to an icon-only view on smaller screens and expands on larger ones; verified via responsive snapshot comparison. |
+| 3 | Dashboard shows placeholder + a clearly visible “New Prompt” button | Button is visible; a click event opens the PromptWizard modal. |
+| 4 | Prompts page lists prompt cards when data is present | Fetch stub returns >0 ⇒ `<PromptCard>` component count matches the data length. |
+| 5 | Prompts page shows an empty-state placeholder when no data exists | Fetch stub returns []; placeholder text is rendered. |
+| 6 | Prompt Wizard modal includes Model dropdown, Task picker, and Next CTA | Form fields render; selections are stored in local component state. |
+| 7 | Dark theme is applied globally; future light mode toggle is stubbed | Snapshots include expected CSS color variables/tokens. |
+| 8 | Routing and component structure passes ESLint/TypeScript checks | The CI pipeline job passes successfully. |
 
 ---
 
-## 4 · Architecture & Implementation Details
+**3 · Context & Dependencies**
 
-## 4.1 Database & Schema (placeholder)
+**Depends on:**
+*   `MP-WEB-CHD-000` – Repository bootstrap (Next.js/Vite, TypeScript, ESLint, Vitest)
+*   Draft Figma mockups for the web interface (attached)
 
-No migration required yet; **stubs only**.
-Future table: `prompts (id, title, content, model, created_at, updated_at)`.
+**Forward hooks / future features:**
+*   `MP-AUTH-SEC-001` – Auth guard on routes
+*   `MP-PRM-API-002` – Real prompt CRUD API integration
+*   `MP-APP-UI-003` – Light-mode theme & system toggle
+*   Sprint X – Analytics instrumentation for navigation events
 
-## 4.2 API Endpoints (future contract)
+---
 
-| Method | Path              | Purpose       | Status |
-| ------ | ----------------- | ------------- | ------ |
-| `GET`  | `/api/v1/prompts` | List prompts  | Stub   |
-| `POST` | `/api/v1/prompts` | Create prompt | Stub   |
+**4 · Architecture & Implementation Details**
 
-## 4.3 Backend Services & Tasks
+**4.1 Database & Schema (placeholder)**
+No migration required yet; stubs only. Future table: `prompts` (id, title, content, model, created_at, updated_at).
 
-*None for this story — UI consumes stubbed mock service.*
+**4.2 API Endpoints (future contract)**
+| Method | Path | Purpose | Status |
+| :--- | :--- | :--- | :--- |
+| GET | `/api/v1/prompts` | List prompts | Stub |
+| POST | `/api/v1/prompts` | Create prompt | Stub |
 
-## 4.4 Frontend (React Native / Expo)
+**4.3 Backend Services & Tasks**
+None for this story — UI consumes a stubbed mock service.
+
+**4.4 Frontend (React / Next.js)**
 
 ```
-mobile/
+web/
  └── src/
-     ├── api/           fetchPrompts.ts     ← mocked return []
-     ├── components/    DrawerHeader.tsx, PromptCard.tsx, FAB.tsx
-     ├── navigation/    AppNavigator.tsx    ← Drawer + Stack (modal)
-     ├── screens/       Dashboard.tsx, Prompts.tsx, PromptWizard.tsx
-     ├── state/         PromptContext.tsx
-     ├── theme/         colors.ts, tailwind.config.js
-     └── types/         Prompt.ts
- App.tsx                ← NavigationContainer + providers
+     ├── app/                 # Or 'pages/'
+     │   ├── (main)/
+     │   │   ├── dashboard/page.tsx
+     │   │   ├── prompts/page.tsx
+     │   │   └── layout.tsx     # Root layout with Sidebar
+     │   └── layout.tsx         # Root app layout
+     ├── lib/api/             # fetchPrompts.ts ← mocked return []
+     ├── components/          # Sidebar.tsx, PromptCard.tsx, NewPromptButton.tsx
+     ├── components/modals/   # PromptWizard.tsx
+     ├── contexts/            # PromptContext.tsx
+     ├── styles/              # globals.css, tailwind.config.js
+     └── types/               # Prompt.ts
 ```
 
-* **Navigation:**
+*   **Routing:**
+    *   Next.js App Router or React Router for page navigation.
+    *   The `PromptWizard` will be a client-rendered modal dialog.
+*   **Styling / Theming:**
+    *   Tailwind CSS using the `class` strategy for dark mode.
+    *   A global `colors.ts` or CSS variables file will define the theme palettes.
+*   **State Management:**
+    *   `PromptContext` (React Context) to manage `{ prompts: Prompt[] }`.
+    *   Actions: `loadPrompts`, `addPrompt`, `selectPrompt`.
+*   **Key Components:**
+    *   `NewPromptButton.tsx` — A primary call-to-action button.
+    *   `PromptCard.tsx` — Displays title, subtitle; `onClick` will eventually lead to a detail view.
 
-  * **DrawerNavigator** (`react-navigation/drawer`) → Dashboard, Prompts
-  * **StackNavigator** (modal) → PromptWizard
-
-* **Styling / Theming:**
-
-  * **NativeWind** (Tailwind-in-RN) or **React Native Paper**
-  * Global dark palette; light palette placeholder in `colors.ts`.
-
-* **State Management:**
-
-  * `PromptContext` (React Context) → `{ prompts: Prompt[] }`
-  * Actions: `loadPrompts`, `addPrompt`, `selectPrompt`
-
-* **Key Components:**
-
-  * `FAB.tsx` — floating action button using `react-native-paper`
-  * `PromptCard.tsx` — title, subtitle, onPress → (future detail view)
-
-## 4.5 Observability & Logging
-
-* **Tracing:** wrap `loadPrompts()` in `expo-sentry` span (`prompts.load`)
-* **Metrics:** *placeholder* counter for prompt list render time
-* **Logging:** structured console logs (`@sentry/react-native` breadcrumb)
+**4.5 Observability & Logging**
+*   **Tracing:** Wrap `loadPrompts()` in a `@sentry/nextjs` span (`prompts.load`).
+*   **Metrics:** Placeholder counter for prompt list render time.
+*   **Logging:** Use structured console logs that are captured as breadcrumbs by Sentry.
 
 ---
 
-## 5 · Testing Strategy
+**5 · Testing Strategy**
 
-| Layer           | Tool                                                     | Tests / Assertions                                  |
-| --------------- | -------------------------------------------------------- | --------------------------------------------------- |
-| **Unit**        | Jest + RTL                                               | Context reducer, PromptCard props                   |
-| **Integration** | RTL (Drawer & Stack navigation)                          | Drawer item press → route renders expected screen   |
-| **E2E**         | Detox (iOS & Android)                                    | Launch app → open FAB → assert PromptWizard visible |
-| **Perf/A11y**   | Expo profile + `@testing-library/jest-native` a11y roles | Color-contrast assertions (WCAG AA)                 |
-
----
-
-## 6 · Documentation & Artifacts
-
-| File / Location              | Action                               |
-| ---------------------------- | ------------------------------------ |
-| `docs/adr/001_mobile_nav.md` | NEW – decision to use Drawer + modal |
-| `mobile/README.md`           | Setup & run instructions             |
-| `docs/api.md`                | Add stub `/prompts` endpoints        |
-| `docs/ux/mockups/`           | Snapshot of current Figma frames     |
+| Layer | Tool | Tests / Assertions |
+| :--- | :--- | :--- |
+| Unit | Vitest + RTL | Context reducer logic, `PromptCard` props rendering. |
+| Integration | RTL | Clicking a sidebar link renders the expected page component. |
+| E2E | Cypress | Launch app → click "New Prompt" → assert that the `PromptWizard` modal is visible. |
+| Perf/A11y | Lighthouse + jest-axe | Color-contrast assertions meet WCAG AA standards. |
 
 ---
 
-## 7 · Risks & Mitigations
+**6 · Documentation & Artifacts**
 
-| Risk                            | Impact                            | Mitigation                                |
-| ------------------------------- | --------------------------------- | ----------------------------------------- |
-| Gesture clashes with Drawer FAB | FAB press triggers drawer gesture | Follow RN best-practice gesture config    |
-| Drawer performance on low-end   | Lag on animation                  | Lazy-load screens; keep icon assets small |
-| Style drift as features add up  | Inconsistent UI                   | Central Tailwind tokens; style-lint in CI |
-
----
-
-## 8 · Future Considerations & Placeholders
-
-* **Auth Guard:** protect PromptWizard for signed-in users only.
-* **Offline Cache:** cache prompts with MMKV for flight mode usage.
-* **Deep Links:** open `/wizard?model=…` from notifications.
-* **Web PWA shell:** reuse navigation pattern in React web build.
+| File / Location | Action |
+| :--- | :--- |
+| `docs/adr/002_web_nav.md` | **NEW** – Decision to use a responsive sidebar and modal wizard. |
+| `web/README.md` | Add setup and run instructions for the web application. |
+| `docs/api.md` | Update with stub `/prompts` endpoints if not already present. |
+| `docs/ux/mockups/` | Snapshot of current Figma frames for the web UI. |
 
 ---
 
-## 9 · Pseudocode & Developer Notes
+**7 · Risks & Mitigations**
 
-```ts
-// src/state/PromptContext.tsx
+| Risk | Impact | Mitigation |
+| :--- | :--- | :--- |
+| Cross-browser compatibility | UI appears broken or functions incorrectly on certain browsers (e.g., Safari). | Test on major modern browsers (Chrome, Firefox, Safari); use tools like Autoprefixer for CSS. |
+| SEO implications of CSR | Initial pages may not be indexed well if fully client-side rendered. | Use Next.js for its SSR/SSG capabilities to ensure core content is crawlable. |
+| Style drift as features are added | The UI becomes inconsistent across different parts of the application. | Enforce the use of central Tailwind tokens and component libraries; add style-linting to the CI pipeline. |
+
+---
+
+**8 · Future Considerations & Placeholders**
+
+*   **Auth Guard:** Protect the `PromptWizard` and `Prompts` page, accessible only to signed-in users.
+*   **Offline Cache:** Use IndexedDB and a Service Worker to cache prompts for PWA functionality.
+*   **URL-driven State:** Allow linking directly to the wizard with pre-filled data, e.g., `/prompts/new?model=...`.
+*   **PWA Enhancements:** Add a web app manifest and full service worker support for "Add to Home Screen" and offline capabilities.
+
+---
+
+**9 · Pseudocode & Developer Notes**
+
+```typescript
+// src/contexts/PromptContext.tsx
+import { createContext, useReducer, useEffect, FC } from 'react';
+
+// ... (PromptState, PromptAction types)
+
 export const PromptContext = createContext<PromptState | undefined>(undefined);
 
 function promptReducer(state: PromptState, action: PromptAction): PromptState {
@@ -163,6 +158,7 @@ export const PromptProvider: FC = ({ children }) => {
   const [state, dispatch] = useReducer(promptReducer, { prompts: [] });
 
   useEffect(() => {
+    // fetchPrompts is a mock/stubbed API call
     fetchPrompts().then(data => dispatch({ type: 'LOAD', payload: data }));
   }, []);
 
@@ -174,6 +170,4 @@ export const PromptProvider: FC = ({ children }) => {
 };
 ```
 
----
-
-This story, when completed, delivers a **production-ready navigation scaffold**—fully tested, themed, and structured—on which all future MeatyPrompts mobile features can confidently iterate.
+This story, when completed, delivers a production-ready web navigation scaffold—fully tested, themed, and structured—on which all future MeatyPrompts web features can confidently iterate.
