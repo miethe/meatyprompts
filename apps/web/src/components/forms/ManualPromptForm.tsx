@@ -26,6 +26,7 @@ const ManualPromptForm = ({ onClose }) => {
   });
 
   const onSubmit = async (data: ManualPromptInput) => {
+    console.log('ManualPromptForm submitted:', data);
     await createPrompt(data);
     onClose();
   };
@@ -39,7 +40,7 @@ const ManualPromptForm = ({ onClose }) => {
         <input
           id="title"
           {...register('title')}
-          className="block w-full mt-1"
+          className="block w-full mt-1 text-black text- border-gray-300 rounded-md shadow-md"
         />
         {errors.title && <p className="text-red-500">{errors.title.message}</p>}
       </div>
@@ -50,9 +51,35 @@ const ManualPromptForm = ({ onClose }) => {
         <textarea
           id="body"
           {...register('body')}
-          className="block w-full mt-1"
+          className="block w-full mt-1 text-black border-gray-300 rounded-md shadow-md"
         />
         {errors.body && <p className="text-red-500">{errors.body.message}</p>}
+      </div>
+      <div>
+        <label htmlFor="models" className="block text-sm font-medium text-gray-700">
+          Models
+        </label>
+        <input
+          id="models"
+          {...register('models.0')}
+          className="block w-full mt-1 text-black border-gray-300 rounded-md shadow-md"
+        />
+        {errors.models && <p className="text-red-500">{errors.models.message}</p>}
+      </div>
+      <div>
+        <label htmlFor="visibility" className="block text-sm font-medium text-gray-700">
+          Visibility
+        </label>
+        <select
+          id="visibility"
+          {...register('visibility')}
+          className="block w-full mt-1 text-black border-gray-300 rounded-md shadow-md"
+        >
+          <option value="private">Private</option>
+          <option value="public">Public</option>
+          <option value="team">Team</option>
+        </select>
+        {errors.visibility && <p className="text-red-500">{errors.visibility.message}</p>}
       </div>
       {/* Add other form fields here */}
       <div className="flex justify-end mt-6">

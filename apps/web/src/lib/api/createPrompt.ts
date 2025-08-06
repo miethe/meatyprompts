@@ -1,7 +1,7 @@
 import { ManualPromptInput, Prompt } from '@/types/Prompt';
 
 export async function createPrompt(data: ManualPromptInput): Promise<Prompt> {
-  const response = await fetch('/api/v1/prompts', {
+  const response = await fetch('http://localhost:8000/api/v1/prompts', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',

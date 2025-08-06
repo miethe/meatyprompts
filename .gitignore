@@ -1,11 +1,12 @@
 # Dependencies
-/node_modules
 /.pnpm-store
 **/build
 **/dist
 **/.next
 **/.expo
 **/__pycache__
+**/node_modules
+**/*.egg-info
 
 # Logs
 **/logs
