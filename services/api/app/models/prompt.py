@@ -11,9 +11,10 @@ Base = declarative_base()
 
 class PromptBase(BaseModel):
     title: str
-    purpose: Optional[str] = None
+    purpose: Optional[List[str]] = None
     models: List[str]
     tools: Optional[List[str]] = None
+    platforms: Optional[List[str]] = None
     tags: Optional[List[str]] = None
     body: str
     visibility: str = 'private'
@@ -35,9 +36,10 @@ class PromptVersion(BaseModel):
     prompt_id: UUID
     version: int
     title: str
-    purpose: Optional[str] = None
+    purpose: Optional[List[str]] = None
     models: List[str]
     tools: Optional[List[str]] = None
+    platforms: Optional[List[str]] = None
     tags: Optional[List[str]] = None
     body: str
     visibility: str
@@ -70,9 +72,10 @@ class PromptVersionORM(Base):
     prompt_id = Column(SA_UUID(as_uuid=True), ForeignKey('prompts.id'), nullable=False)
     version = Column(String, nullable=False)
     title = Column(String, nullable=False)
-    purpose = Column(String, nullable=True)
+    purpose = Column(ARRAY(String), nullable=True)
     models = Column(ARRAY(String), nullable=False)
     tools = Column(ARRAY(String), nullable=True)
+    platforms = Column(ARRAY(String), nullable=True)
     tags = Column(ARRAY(String), nullable=True)
     body = Column(String, nullable=False)
     visibility = Column(String, nullable=False)
