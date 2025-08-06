@@ -13,7 +13,7 @@ interface Prompt {
   tags?: string[];
   purpose?: string[];
   models?: string[];
-  tools?: 'string'[];
+  tools?: string[];
   platforms?: string[];
 }
 
