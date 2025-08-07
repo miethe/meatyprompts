@@ -1,18 +1,10 @@
-import React, { useState } from 'react';
-import NewPromptButton from '@/components/NewPromptButton';
-import PromptWizard from '@/components/modals/PromptWizard';
+import React from 'react';
 
 const DashboardPage = () => {
-  const [isWizardOpen, setIsWizardOpen] = useState(false);
-
   return (
     <div>
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold">Dashboard</h1>
-        <NewPromptButton onClick={() => setIsWizardOpen(true)} />
-      </div>
+      <h1 className="text-2xl font-bold">Dashboard</h1>
       <p className="mt-4">Welcome to your dashboard.</p>
-      {isWizardOpen && <PromptWizard onClose={() => setIsWizardOpen(false)} />}
     </div>
   );
 };
