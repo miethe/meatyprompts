@@ -58,17 +58,14 @@ export const manualPromptFormSchema = z.object({
 
 type ManualPromptFormProps = {
   onClose: () => void;
+  readOnly?: boolean;
 };
 
-const ManualPromptForm = ({ onClose }: ManualPromptFormProps) => {
+const ManualPromptForm = ({ onClose, readOnly = false }: ManualPromptFormProps) => {
   const { createPrompt } = usePrompt();
   const { lookups, addLookup } = useLookups();
   const [activeTab, setActiveTab] = useState<'basic' | 'advanced' | 'governance'>('basic');
   const { help } = useFieldHelp();
-
-  type ManualPromptFormProps = {
-    onClose: () => void;
-  };
 
   const {
     register,
@@ -135,6 +132,8 @@ const ManualPromptForm = ({ onClose }: ManualPromptFormProps) => {
               id="title"
               {...register('title')}
               className="block w-full mt-1 text-black border-gray-300 rounded-md shadow-md"
+              readOnly={readOnly}
+              disabled={readOnly}
             />
             {typeof errors.title?.message === 'string' && <p className="text-red-500">{errors.title.message}</p>}
           </div>
@@ -163,6 +162,7 @@ const ManualPromptForm = ({ onClose }: ManualPromptFormProps) => {
                   value={field.value}
                   language={language}
                   onChange={field.onChange}
+                  readOnly={readOnly}
                 />
               )}
             />
@@ -254,12 +254,34 @@ const ManualPromptForm = ({ onClose }: ManualPromptFormProps) => {
           </div>
           <div>
             <label htmlFor="sample_input" className="block text-sm font-medium text-gray-700">Sample Input</label>
-            <textarea id="sample_input" {...register('sample_input')} className="block w-full mt-1 text-black border-gray-300 rounded-md shadow-md" />
+            <Controller
+              name="sample_input"
+              control={control}
+              render={({ field }) => (
+                <CodeEditor
+                  value={field.value}
+                  language="json"
+                  onChange={field.onChange}
+                  readOnly={readOnly}
+                />
+              )}
+            />
             {errors.sample_input && <p className="text-red-500">{errors.sample_input.message as string}</p>}
           </div>
           <div>
             <label htmlFor="sample_output" className="block text-sm font-medium text-gray-700">Sample Output</label>
-            <textarea id="sample_output" {...register('sample_output')} className="block w-full mt-1 text-black border-gray-300 rounded-md shadow-md" />
+            <Controller
+              name="sample_output"
+              control={control}
+              render={({ field }) => (
+                <CodeEditor
+                  value={field.value}
+                  language="json"
+                  onChange={field.onChange}
+                  readOnly={readOnly}
+                />
+              )}
+            />
             {typeof errors.sample_output?.message === 'string' && <p className="text-red-500">{errors.sample_output.message}</p>}
           </div>
           <div>

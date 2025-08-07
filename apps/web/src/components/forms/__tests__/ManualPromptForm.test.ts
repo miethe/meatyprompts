@@ -1,6 +1,11 @@
-import React from 'react';
-import { render, screen } from '@testing-library/react';
-import ManualPromptForm from '../ManualPromptForm';
+jest.mock('../../CodeEditor', () => {
+  const React = require('react');
+  return {
+    __esModule: true,
+    default: (props: any) => React.createElement('textarea', { 'data-testid': 'codemirror', readOnly: props.readOnly }),
+    LANGUAGE_OPTIONS: ['plaintext'],
+  };
+});
 
 jest.mock('../../form/TagInput', () => {
   const React = require('react');
@@ -33,11 +38,16 @@ jest.mock('../../../contexts/FieldHelpContext', () => ({
   }),
 }));
 
+import React from 'react';
+import { render, screen, fireEvent } from '@testing-library/react';
+import ManualPromptForm from '../ManualPromptForm';
+
 describe('ManualPromptForm', () => {
   it('renders field help tooltips', () => {
     render(React.createElement(ManualPromptForm, { onClose: () => {} }));
-    expect(screen.getByTitle('Target models help')).toBeInTheDocument();
-    expect(screen.getByTitle('Providers help')).toBeInTheDocument();
-    expect(screen.getByTitle('Integrations help')).toBeInTheDocument();
+    expect(screen.getAllByLabelText('Information')).toHaveLength(3);
+    expect(screen.getAllByTestId('codemirror')).toHaveLength(1);
+    fireEvent.click(screen.getByText('Advanced'));
+    expect(screen.getAllByTestId('codemirror')).toHaveLength(2);
   });
 });

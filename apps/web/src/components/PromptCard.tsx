@@ -1,4 +1,5 @@
 import React from 'react';
+import CopyIconButton from './common/CopyIconButton';
 
 // Assuming a Prompt type, which should be defined in your types folder
 interface Prompt {
@@ -29,9 +30,12 @@ const PromptCard: React.FC<PromptCardProps> = ({ prompt, onClick }) => {
     >
       <div>
         <h3 className="text-lg font-bold text-white truncate">{prompt.title}</h3>
-        <p className="text-sm text-gray-400 mt-1 h-10 overflow-hidden text-ellipsis">
-          {prompt.body}
-        </p>
+        <div className="flex items-start mt-1">
+          <p className="text-sm text-gray-400 h-10 overflow-hidden text-ellipsis flex-1">
+            {prompt.body}
+          </p>
+          <CopyIconButton text={prompt.body} />
+        </div>
         <div className="mt-4 flex flex-wrap gap-2">
           {allTags.slice(0, 4).map((tag, index) => (
             <Tag key={index}>{tag}</Tag>

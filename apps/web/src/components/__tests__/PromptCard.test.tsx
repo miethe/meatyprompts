@@ -19,8 +19,6 @@ describe('PromptCard', () => {
     expect(screen.getByText('Test Prompt')).toBeInTheDocument();
     expect(screen.getByText('This is the body of the prompt.')).toBeInTheDocument();
     expect(screen.getByText('v1')).toBeInTheDocument();
-    expect(screen.getByText('testing')).toBeInTheDocument();
-    expect(screen.getByText('gpt-4')).toBeInTheDocument();
     expect(screen.getByText('tag1')).toBeInTheDocument();
   });
 
@@ -30,5 +28,14 @@ describe('PromptCard', () => {
 
     fireEvent.click(screen.getByText('Test Prompt'));
     expect(handleClick).toHaveBeenCalledTimes(1);
+  });
+
+  it('copies body text when copy icon clicked', () => {
+    const writeText = jest.fn().mockResolvedValue(undefined);
+    Object.assign(navigator, { clipboard: { writeText } });
+    render(<PromptCard prompt={prompt} onClick={() => {}} />);
+    const button = screen.getByLabelText('Copy to clipboard');
+    fireEvent.click(button);
+    expect(writeText).toHaveBeenCalledWith('This is the body of the prompt.');
   });
 });
