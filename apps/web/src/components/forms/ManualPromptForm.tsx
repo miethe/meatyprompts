@@ -59,6 +59,11 @@ type ManualPromptFormProps = {
 };
 
 const ManualPromptForm = ({ onClose }: ManualPromptFormProps) => {
+type ManualPromptFormProps = {
+  onClose: () => void;
+};
+
+const ManualPromptForm = ({ onClose }: ManualPromptFormProps) => {
   const { createPrompt } = usePrompt();
   const { lookups, addLookup } = useLookups();
   const [activeTab, setActiveTab] = useState<'basic' | 'advanced' | 'governance'>('basic');
@@ -78,6 +83,17 @@ const ManualPromptForm = ({ onClose }: ManualPromptFormProps) => {
       integrations: [],
       use_cases: [],
       tags: [],
+      related_prompt_ids: [],
+      category: '',
+      complexity: '',
+      audience: '',
+      status: '',
+      input_schema: '',
+      llm_parameters: '',
+      sample_input: '',
+      sample_output: '',
+      link: '',
+      access_control: 'public',
       related_prompt_ids: [],
       category: '',
       complexity: '',
