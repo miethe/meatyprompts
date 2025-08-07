@@ -1,0 +1,31 @@
+{
+  "sidebar": {
+    "newPrompt": "New Prompt"
+  },
+  "copy": {
+    "buttonLabel": "Text copied to clipboard",
+    "error": "Failed to copy text to clipboard"
+  },
+  "form": {
+    "title": "Title",
+    "promptText": "Prompt Text",
+    "targetModels": "Target Models",
+    "useCases": "Use Cases",
+    "providers": "Providers",
+    "integrations": "Integrations",
+    "tags": "Tags",
+    "inputSchema": "Input Schema",
+    "llmParameters": "LLM Parameters",
+    "sampleInput": "Sample Input",
+    "sampleOutput": "Sample Output",
+    "relatedPromptIds": "Related Prompt IDs",
+    "category": "Category",
+    "complexity": "Complexity",
+    "audience": "Audience",
+    "status": "Status",
+    "link": "Link",
+    "accessControl": "Access Control",
+    "cancel": "Cancel",
+    "submit": "Submit"
+  }
+}
