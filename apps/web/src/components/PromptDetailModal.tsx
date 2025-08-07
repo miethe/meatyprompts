@@ -31,7 +31,11 @@ interface PromptDetailModalProps {
 const PromptDetailModal: React.FC<PromptDetailModalProps> = ({ prompt, isOpen, onClose, onSave }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [editedPrompt, setEditedPrompt] = useState<Prompt>(prompt);
-  const [language, setLanguage] = useState<Language>((prompt.output_format as Language) || 'plaintext');
+  const [language, setLanguage] = useState<Language>(
+    prompt.output_format && LANGUAGE_OPTIONS.includes(prompt.output_format as Language)
+      ? (prompt.output_format as Language)
+      : 'plaintext'
+  );
 
   const handleSave = () => {
     onSave(editedPrompt);
@@ -100,18 +104,22 @@ const PromptDetailModal: React.FC<PromptDetailModalProps> = ({ prompt, isOpen, o
           <div className="grid grid-cols-4 items-start gap-4">
             <label htmlFor="sample_input" className="text-right mt-2">Sample Input</label>
             {isEditing ? (
-              <div className="col-span-3">
+                <div className="col-span-3">
                 <CodeEditor
                   value={JSON.stringify(editedPrompt.sample_input ?? {}, null, 2)}
                   language="json"
-                  onChange={(val) =>
+                  onChange={(val) => {
+                  try {
                     setEditedPrompt({
-                      ...editedPrompt,
-                      sample_input: JSON.parse(val || '{}'),
-                    })
+                    ...editedPrompt,
+                    sample_input: JSON.parse(val || '{}'),
+                    });
+                  } catch (e) {
+                    console.error('Invalid JSON in sample input:', e);
                   }
+                  }}
                 />
-              </div>
+                </div>
             ) : (
               <pre className="col-span-3 whitespace-pre-wrap text-sm">
                 {JSON.stringify(prompt.sample_input, null, 2)}
@@ -127,12 +135,16 @@ const PromptDetailModal: React.FC<PromptDetailModalProps> = ({ prompt, isOpen, o
                 <CodeEditor
                   value={JSON.stringify(editedPrompt.sample_output ?? {}, null, 2)}
                   language="json"
-                  onChange={(val) =>
+                  onChange={(val) => {
+                  try {
                     setEditedPrompt({
-                      ...editedPrompt,
-                      sample_output: JSON.parse(val || '{}'),
-                    })
+                    ...editedPrompt,
+                    sample_output: JSON.parse(val || '{}'),
+                    });
+                  } catch (e) {
+                    console.error('Invalid JSON in sample output:', e);
                   }
+                  }}
                 />
               </div>
             ) : (
