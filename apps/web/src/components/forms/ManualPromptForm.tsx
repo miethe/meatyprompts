@@ -10,13 +10,13 @@ import { useLookups } from '@/contexts/LookupContext';
 
 const schema = z.object({
   title: z.string().min(1, 'Title is required'),
-  purpose: z.array(z.string()).optional(),
-  models: z.array(z.string()).min(1, 'At least one model is required'),
-  tools: z.array(z.string()).optional(),
-  platforms: z.array(z.string()).optional(),
+  use_cases: z.array(z.string()).min(1, 'Use case is required'),
+  target_models: z.array(z.string()).min(1, 'At least one model is required'),
+  providers: z.array(z.string()).optional(),
+  integrations: z.array(z.string()).optional(),
   tags: z.array(z.string()).optional(),
   body: z.string().min(1, 'Prompt text is required'),
-  visibility: z.enum(['private', 'public', 'team']),
+  access_control: z.enum(['public', 'private', 'team-only', 'role-based']),
 });
 
 const ManualPromptForm = ({ onClose }) => {
@@ -32,10 +32,10 @@ const ManualPromptForm = ({ onClose }) => {
   } = useForm<ManualPromptInput>({
     resolver: zodResolver(schema),
     defaultValues: {
-      models: [],
-      tools: [],
-      platforms: [],
-      purpose: [],
+      target_models: [],
+      providers: [],
+      integrations: [],
+      use_cases: [],
       tags: [],
     }
   });
@@ -51,7 +51,7 @@ const ManualPromptForm = ({ onClose }) => {
     }
   };
 
-  const handleCreateOption = (type: 'models' | 'tools' | 'platforms' | 'purposes') => (inputValue: string) => {
+  const handleCreateOption = (type: 'target_models' | 'providers' | 'integrations' | 'use_cases') => (inputValue: string) => {
     addLookup(type, inputValue);
   };
 
@@ -81,53 +81,53 @@ const ManualPromptForm = ({ onClose }) => {
         {errors.body && <p className="text-red-500">{errors.body.message}</p>}
       </div>
 
-      {/* Models */}
+      {/* Target Models */}
       <div>
-        <label htmlFor="models" className="block text-sm font-medium text-gray-700">
-          Models
+        <label htmlFor="target_models" className="block text-sm font-medium text-gray-700">
+          Target Models
         </label>
         <Controller
-          name="models"
+          name="target_models"
           control={control}
           render={({ field }) => (
             <CreatableMultiSelect
               isLoading={lookups.loading}
-              options={lookups.models}
-              value={lookups.models.filter(o => field.value?.includes(o.value))}
+              options={lookups.target_models}
+              value={lookups.target_models.filter(o => field.value?.includes(o.value))}
               onChange={(options) => field.onChange(options.map(o => o.value))}
-              onCreateOption={handleCreateOption('models')}
+              onCreateOption={handleCreateOption('target_models')}
               placeholder="Select or create models..."
             />
           )}
         />
-        {errors.models && <p className="text-red-500">{errors.models.message}</p>}
+        {errors.target_models && <p className="text-red-500">{errors.target_models.message}</p>}
       </div>
 
-      {/* Purpose */}
+      {/* Use Cases */}
       <div>
-        <label htmlFor="purpose" className="block text-sm font-medium text-gray-700">Purpose</label>
-        <Controller name="purpose" control={control} render={({ field }) => (
-            <CreatableMultiSelect isLoading={lookups.loading} options={lookups.purposes} value={lookups.purposes.filter(o => field.value?.includes(o.value))} onChange={(options) => field.onChange(options.map(o => o.value))} onCreateOption={handleCreateOption('purposes')} />
+        <label htmlFor="use_cases" className="block text-sm font-medium text-gray-700">Use Cases</label>
+        <Controller name="use_cases" control={control} render={({ field }) => (
+            <CreatableMultiSelect isLoading={lookups.loading} options={lookups.use_cases} value={lookups.use_cases.filter(o => field.value?.includes(o.value))} onChange={(options) => field.onChange(options.map(o => o.value))} onCreateOption={handleCreateOption('use_cases')} />
         )} />
-        {errors.purpose && <p className="text-red-500">{errors.purpose.message}</p>}
+        {errors.use_cases && <p className="text-red-500">{errors.use_cases.message}</p>}
       </div>
 
-      {/* Tools */}
+      {/* Providers */}
       <div>
-        <label htmlFor="tools" className="block text-sm font-medium text-gray-700">Tools</label>
-        <Controller name="tools" control={control} render={({ field }) => (
-            <CreatableMultiSelect isLoading={lookups.loading} options={lookups.tools} value={lookups.tools.filter(o => field.value?.includes(o.value))} onChange={(options) => field.onChange(options.map(o => o.value))} onCreateOption={handleCreateOption('tools')} />
+        <label htmlFor="providers" className="block text-sm font-medium text-gray-700">Providers</label>
+        <Controller name="providers" control={control} render={({ field }) => (
+            <CreatableMultiSelect isLoading={lookups.loading} options={lookups.providers} value={lookups.providers.filter(o => field.value?.includes(o.value))} onChange={(options) => field.onChange(options.map(o => o.value))} onCreateOption={handleCreateOption('providers')} />
         )} />
-        {errors.tools && <p className="text-red-500">{errors.tools.message}</p>}
+        {errors.providers && <p className="text-red-500">{errors.providers.message}</p>}
       </div>
 
-      {/* Platforms */}
+      {/* Integrations */}
       <div>
-        <label htmlFor="platforms" className="block text-sm font-medium text-gray-700">Platforms</label>
-        <Controller name="platforms" control={control} render={({ field }) => (
-            <CreatableMultiSelect isLoading={lookups.loading} options={lookups.platforms} value={lookups.platforms.filter(o => field.value?.includes(o.value))} onChange={(options) => field.onChange(options.map(o => o.value))} onCreateOption={handleCreateOption('platforms')} />
+        <label htmlFor="integrations" className="block text-sm font-medium text-gray-700">Integrations</label>
+        <Controller name="integrations" control={control} render={({ field }) => (
+            <CreatableMultiSelect isLoading={lookups.loading} options={lookups.integrations} value={lookups.integrations.filter(o => field.value?.includes(o.value))} onChange={(options) => field.onChange(options.map(o => o.value))} onCreateOption={handleCreateOption('integrations')} />
         )} />
-        {errors.platforms && <p className="text-red-500">{errors.platforms.message}</p>}
+        {errors.integrations && <p className="text-red-500">{errors.integrations.message}</p>}
       </div>
 
       {/* Tags */}
@@ -140,19 +140,20 @@ const ManualPromptForm = ({ onClose }) => {
       </div>
 
       <div>
-        <label htmlFor="visibility" className="block text-sm font-medium text-gray-700">
-          Visibility
+        <label htmlFor="access_control" className="block text-sm font-medium text-gray-700">
+          Access Control
         </label>
         <select
-          id="visibility"
-          {...register('visibility')}
+          id="access_control"
+          {...register('access_control')}
           className="block w-full mt-1 text-black border-gray-300 rounded-md shadow-md"
         >
           <option value="public">Public</option>
           <option value="private">Private</option>
-          <option value="team">Team</option>
+          <option value="team-only">Team Only</option>
+          <option value="role-based">Role Based</option>
         </select>
-        {errors.visibility && <p className="text-red-500">{errors.visibility.message}</p>}
+        {errors.access_control && <p className="text-red-500">{errors.access_control.message}</p>}
       </div>
       {/* Add other form fields here */}
       <div className="flex justify-end mt-6">

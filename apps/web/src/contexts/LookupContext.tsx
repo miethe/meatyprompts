@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { getLookups, createLookup } from '../lib/api/lookups';
 
-type LookupType = 'models' | 'tools' | 'platforms' | 'purposes';
+type LookupType = 'target_models' | 'providers' | 'integrations' | 'use_cases';
 
 interface Option {
   value: string;
@@ -9,10 +9,10 @@ interface Option {
 }
 
 interface LookupState {
-  models: Option[];
-  tools: Option[];
-  platforms: Option[];
-  purposes: Option[];
+  target_models: Option[];
+  providers: Option[];
+  integrations: Option[];
+  use_cases: Option[];
   loading: boolean;
 }
 
@@ -25,28 +25,28 @@ const LookupContext = createContext<LookupContextType | undefined>(undefined);
 
 export const LookupProvider = ({ children }: { children: ReactNode }) => {
   const [lookups, setLookups] = useState<LookupState>({
-    models: [],
-    tools: [],
-    platforms: [],
-    purposes: [],
+    target_models: [],
+    providers: [],
+    integrations: [],
+    use_cases: [],
     loading: true,
   });
 
   useEffect(() => {
     const fetchAllLookups = async () => {
       try {
-        const [models, tools, platforms, purposes] = await Promise.all([
-          getLookups('models'),
-          getLookups('tools'),
-          getLookups('platforms'),
-          getLookups('purposes'),
+        const [target_models, providers, integrations, use_cases] = await Promise.all([
+          getLookups('target_models'),
+          getLookups('providers'),
+          getLookups('integrations'),
+          getLookups('use_cases'),
         ]);
 
         setLookups({
-          models: models.map(m => ({ value: m.value, label: m.value })),
-          tools: tools.map(t => ({ value: t.value, label: t.value })),
-          platforms: platforms.map(p => ({ value: p.value, label: p.value })),
-          purposes: purposes.map(p => ({ value: p.value, label: p.value })),
+          target_models: target_models.map(m => ({ value: m.value, label: m.value })),
+          providers: providers.map(t => ({ value: t.value, label: t.value })),
+          integrations: integrations.map(p => ({ value: p.value, label: p.value })),
+          use_cases: use_cases.map(p => ({ value: p.value, label: p.value })),
           loading: false,
         });
       } catch (error) {
