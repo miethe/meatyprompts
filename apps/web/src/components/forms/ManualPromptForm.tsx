@@ -7,6 +7,8 @@ import { usePrompt } from '@/contexts/PromptContext';
 import CreatableMultiSelect from '../form/CreatableMultiSelect';
 import TagInput from '../form/TagInput';
 import { useLookups } from '@/contexts/LookupContext';
+import { useFieldHelp } from '@/contexts/FieldHelpContext';
+import RadixTooltip from '../ui/RadixTooltip';
 
 const jsonField = z
   .string()
@@ -57,9 +59,16 @@ type ManualPromptFormProps = {
 };
 
 const ManualPromptForm = ({ onClose }: ManualPromptFormProps) => {
+type ManualPromptFormProps = {
+  onClose: () => void;
+};
+
+const ManualPromptForm = ({ onClose }: ManualPromptFormProps) => {
   const { createPrompt } = usePrompt();
   const { lookups, addLookup } = useLookups();
   const [activeTab, setActiveTab] = useState<'basic' | 'advanced' | 'governance'>('basic');
+  const { help } = useFieldHelp();
+
 
   const {
     register,
@@ -74,6 +83,17 @@ const ManualPromptForm = ({ onClose }: ManualPromptFormProps) => {
       integrations: [],
       use_cases: [],
       tags: [],
+      related_prompt_ids: [],
+      category: '',
+      complexity: '',
+      audience: '',
+      status: '',
+      input_schema: '',
+      llm_parameters: '',
+      sample_input: '',
+      sample_output: '',
+      link: '',
+      access_control: 'public',
       related_prompt_ids: [],
       category: '',
       complexity: '',
@@ -137,7 +157,11 @@ const ManualPromptForm = ({ onClose }: ManualPromptFormProps) => {
           </div>
           <div>
             <label htmlFor="target_models" className="block text-sm font-medium text-gray-700">
-              Target Models
+              Target Models{help.target_models && (
+                <RadixTooltip content={help.target_models}>
+                  <span className="ml-1 text-gray-400 cursor-help" role="img" aria-label="Information">ⓘ</span>
+                </RadixTooltip>
+              )}
             </label>
             <Controller
               name="target_models"
@@ -163,23 +187,39 @@ const ManualPromptForm = ({ onClose }: ManualPromptFormProps) => {
             {typeof errors.use_cases?.message === 'string' && <p className="text-red-500">{errors.use_cases.message}</p>}
           </div>
           <div>
-            <label htmlFor="providers" className="block text-sm font-medium text-gray-700">Providers</label>
+            <label htmlFor="providers" className="block text-sm font-medium text-gray-700">Providers{help.providers && (
+              <RadixTooltip content={help.providers}>
+                <span className="ml-1 text-gray-400 cursor-help" role="img" aria-label="Information">ⓘ</span>
+              </RadixTooltip>
+            )}</label>
             <Controller name="providers" control={control} render={({ field }) => (
                 <CreatableMultiSelect isLoading={lookups.loading} options={lookups.providers} value={lookups.providers.filter(o => field.value?.includes(o.value))} onChange={(options) => field.onChange(options.map(o => o.value))} onCreateOption={handleCreateOption('providers')} />
             )} />
             {typeof errors.providers?.message === 'string' && <p className="text-red-500">{errors.providers.message}</p>}
           </div>
           <div>
-            <label htmlFor="integrations" className="block text-sm font-medium text-gray-700">Integrations</label>
+            <label htmlFor="integrations" className="block text-sm font-medium text-gray-700">
+              Integrations
+              {help.integrations && (
+                <RadixTooltip content={help.integrations}>
+                  <span className="ml-1 text-gray-400 cursor-help" role="img" aria-label="Information">ⓘ</span>
+                </RadixTooltip>
+              )}
+            </label>
             <Controller name="integrations" control={control} render={({ field }) => (
-                <CreatableMultiSelect isLoading={lookups.loading} options={lookups.integrations} value={lookups.integrations.filter(o => field.value?.includes(o.value))} onChange={(options) => field.onChange(options.map(o => o.value))} onCreateOption={handleCreateOption('integrations')} />
+                <CreatableMultiSelect isLoading={lookups.loading} options={lookups.integrations}
+                  value={lookups.integrations.filter(o => field.value?.includes(o.value))} onChange={(options) =>
+                  field.onChange(options.map(o => o.value))} onCreateOption={handleCreateOption('integrations')}
+                />
             )} />
             {typeof errors.integrations?.message === 'string' && <p className="text-red-500">{errors.integrations.message}</p>}
           </div>
           <div>
             <label htmlFor="tags" className="block text-sm font-medium text-gray-700">Tags</label>
             <Controller name="tags" control={control} render={({ field }) => (
-                <TagInput tags={field.value?.map((t: string) => ({id: t, text: t, className: ''})) || []} setTags={(newTags) => field.onChange(newTags.map(t => t.text))} placeholder="Add tags..." />
+                <TagInput tags={field.value?.map((t: string) => ({id: t, text: t, className: ''})) || []}
+                  setTags={(newTags) => field.onChange(newTags.map(t => t.text))} placeholder="Add tags..."
+                />
             )} />
             {typeof errors.tags?.message === 'string' && <p className="text-red-500">{errors.tags.message}</p>}
           </div>
@@ -246,8 +286,14 @@ const ManualPromptForm = ({ onClose }: ManualPromptFormProps) => {
             {typeof errors.link?.message === 'string' && <p className="text-red-500">{errors.link.message}</p>}
           </div>
           <div>
-            <label htmlFor="access_control" className="block text-sm font-medium text-gray-700">Access Control</label>
-            <select id="access_control" {...register('access_control')} className="block w-full mt-1 text-black border-gray-300 rounded-md shadow-md">
+            <label htmlFor="access_control" className="block text-sm font-medium text-gray-700">
+              Access Control
+            </label>
+            <select
+              id="access_control"
+              {...register('access_control')}
+              className="block w-full mt-1 text-black border-gray-300 rounded-md shadow-md"
+            >
               <option value="public">Public</option>
               <option value="private">Private</option>
               <option value="team-only">Team Only</option>
