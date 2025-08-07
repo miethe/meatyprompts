@@ -7,6 +7,7 @@ import { usePrompt } from '@/contexts/PromptContext';
 import CreatableMultiSelect from '../form/CreatableMultiSelect';
 import TagInput from '../form/TagInput';
 import { useLookups } from '@/contexts/LookupContext';
+import CodeEditor, { LANGUAGE_OPTIONS, Language } from '../CodeEditor';
 import { useFieldHelp } from '@/contexts/FieldHelpContext';
 import RadixTooltip from '../ui/RadixTooltip';
 
@@ -51,14 +52,10 @@ export const manualPromptFormSchema = z.object({
   sample_output: jsonField,
   related_prompt_ids: z.array(z.string()).optional(),
   link: z.string().optional(),
+  output_format: z.string().optional(),
   access_control: z.enum(['public', 'private', 'team-only', 'role-based']),
 });
 
-type ManualPromptFormProps = {
-  onClose: () => void;
-};
-
-const ManualPromptForm = ({ onClose }: ManualPromptFormProps) => {
 type ManualPromptFormProps = {
   onClose: () => void;
 };
@@ -69,11 +66,15 @@ const ManualPromptForm = ({ onClose }: ManualPromptFormProps) => {
   const [activeTab, setActiveTab] = useState<'basic' | 'advanced' | 'governance'>('basic');
   const { help } = useFieldHelp();
 
+  type ManualPromptFormProps = {
+    onClose: () => void;
+  };
 
   const {
     register,
     handleSubmit,
     control,
+    setValue,
     formState: { errors },
   } = useForm<any>({
     resolver: zodResolver(manualPromptFormSchema),
@@ -94,19 +95,12 @@ const ManualPromptForm = ({ onClose }: ManualPromptFormProps) => {
       sample_output: '',
       link: '',
       access_control: 'public',
-      related_prompt_ids: [],
-      category: '',
-      complexity: '',
-      audience: '',
-      status: '',
-      input_schema: '',
-      llm_parameters: '',
-      sample_input: '',
-      sample_output: '',
-      link: '',
-      access_control: 'public',
+      body: '',
+      output_format: 'plaintext',
     }
   });
+
+  const [language, setLanguage] = useState<Language>('plaintext');
 
   const onSubmit = async (data: ManualPromptInput) => {
     console.log('ManualPromptForm submitted:', data);
@@ -148,11 +142,31 @@ const ManualPromptForm = ({ onClose }: ManualPromptFormProps) => {
             <label htmlFor="body" className="block text-sm font-medium text-gray-700">
               Prompt Text
             </label>
-            <textarea
-              id="body"
-              {...register('body')}
-              className="block w-full mt-1 text-black border-gray-300 rounded-md shadow-md"
+            <select
+              className="mt-1 mb-2 text-black border-gray-300 rounded-md"
+              value={language}
+              onChange={(e) => {
+                const lang = e.target.value as Language;
+                setLanguage(lang);
+                setValue('output_format', lang);
+              }}
+            >
+              {LANGUAGE_OPTIONS.map((opt) => (
+                <option key={opt} value={opt}>{opt}</option>
+              ))}
+            </select>
+            <Controller
+              name="body"
+              control={control}
+              render={({ field }) => (
+                <CodeEditor
+                  value={field.value}
+                  language={language}
+                  onChange={field.onChange}
+                />
+              )}
             />
+            <input type="hidden" {...register('output_format')} />
             {typeof errors.body?.message === 'string' && <p className="text-red-500">{errors.body.message}</p>}
           </div>
           <div>
@@ -304,6 +318,7 @@ const ManualPromptForm = ({ onClose }: ManualPromptFormProps) => {
         </div>
       )}
 
+      {/* Add other form fields here */}
       <div className="flex justify-end mt-6">
         <button
           type="button"
