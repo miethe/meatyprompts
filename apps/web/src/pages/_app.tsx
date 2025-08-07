@@ -1,4 +1,5 @@
 import '@/styles/globals.css'
+import '@/i18n';
 import type { AppProps } from 'next/app'
 import Layout from '@/components/Layout'
 import { PromptProvider } from '@/contexts/PromptContext'

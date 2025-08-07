@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
+import { useTranslation } from 'react-i18next';
 import { Plus } from 'lucide-react';
 import ThemedButton from './common/ThemedButton';
 import NewPromptModal from './modals/NewPromptModal';
 
 const Sidebar = () => {
   const [modalOpen, setModalOpen] = useState(false);
+  const { t } = useTranslation();
 
   return (
     <div className="flex flex-col w-64 bg-gray-800">
@@ -18,12 +20,14 @@ const Sidebar = () => {
             <li>
               <Link href="/dashboard" className="flex items-center h-10 px-3 text-gray-300 rounded hover:bg-gray-700">
                 <span className="mr-2">📊</span>
+                {!isCollapsed && t('sidebar.dashboard', 'Dashboard')}
                 Dashboard
               </Link>
             </li>
             <li>
               <Link href="/prompts" className="flex items-center h-10 px-3 text-gray-300 rounded hover:bg-gray-700">
                 <span className="mr-2">💡</span>
+                {!isCollapsed && t('sidebar.prompts', 'Prompts')}
                 Prompts
               </Link>
             </li>

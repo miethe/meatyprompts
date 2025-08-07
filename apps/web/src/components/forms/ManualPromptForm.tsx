@@ -11,6 +11,7 @@ import CodeEditor, { LANGUAGE_OPTIONS, Language } from '../CodeEditor';
 import { useFieldHelp } from '@/contexts/FieldHelpContext';
 import RadixTooltip from '../ui/RadixTooltip';
 import LanguageSelect from '../form/LanguageSelect';
+import { useTranslation } from 'react-i18next';
 
 const jsonField = z
   .string()
@@ -69,6 +70,7 @@ const ManualPromptForm = ({ onClose, readOnly = false }: ManualPromptFormProps) 
   const { lookups, addLookup } = useLookups();
   const [activeTab, setActiveTab] = useState<'basic' | 'advanced' | 'governance'>('basic');
   const { help } = useFieldHelp();
+  const { t } = useTranslation();
 
   const {
     register,
@@ -124,16 +126,16 @@ const ManualPromptForm = ({ onClose, readOnly = false }: ManualPromptFormProps) 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
       <div className="flex mb-4 space-x-4 border-b">
-        <button type="button" onClick={() => setActiveTab('basic')} className={`px-3 py-1 text-black ${activeTab === 'basic' ? 'border-b-2 border-blue-500' : ''}`}>Basic</button>
-        <button type="button" onClick={() => setActiveTab('advanced')} className={`px-3 py-1 text-black ${activeTab === 'advanced' ? 'border-b-2 border-blue-500' : ''}`}>Advanced</button>
-        <button type="button" onClick={() => setActiveTab('governance')} className={`px-3 py-1 text-black ${activeTab === 'governance' ? 'border-b-2 border-blue-500' : ''}`}>Governance</button>
+        <button type="button" onClick={() => setActiveTab('basic')} className={`px-3 py-1 text-black ${activeTab === 'basic' ? 'border-b-2 border-blue-500' : ''}`}>{t('form.basic')}</button>
+        <button type="button" onClick={() => setActiveTab('advanced')} className={`px-3 py-1 text-black ${activeTab === 'advanced' ? 'border-b-2 border-blue-500' : ''}`}>{t('form.advanced')}</button>
+        <button type="button" onClick={() => setActiveTab('governance')} className={`px-3 py-1 text-black ${activeTab === 'governance' ? 'border-b-2 border-blue-500' : ''}`}>{t('form.governance')}</button>
       </div>
 
       {activeTab === 'basic' && (
         <div className="space-y-4">
           <div>
             <label htmlFor="title" className="block text-sm font-medium text-gray-700">
-              Title
+              {t('form.title')}
             </label>
             <input
               id="title"
@@ -146,7 +148,7 @@ const ManualPromptForm = ({ onClose, readOnly = false }: ManualPromptFormProps) 
           </div>
           <div>
             <label htmlFor="body" className="block text-sm font-medium text-gray-700">
-              Prompt Text
+              {t('form.promptText')}
             </label>
             <LanguageSelect
               value={language}
@@ -173,7 +175,7 @@ const ManualPromptForm = ({ onClose, readOnly = false }: ManualPromptFormProps) 
           </div>
           <div>
             <label htmlFor="target_models" className="block text-sm font-medium text-gray-700">
-              Target Models{help.target_models && (
+              {t('form.targetModels')}{help.target_models && (
                 <RadixTooltip content={help.target_models}>
                   <span className="ml-1 text-gray-400 cursor-help" role="img" aria-label="Information">ⓘ</span>
                 </RadixTooltip>
@@ -189,21 +191,21 @@ const ManualPromptForm = ({ onClose, readOnly = false }: ManualPromptFormProps) 
                   value={lookups.target_models.filter(o => field.value?.includes(o.value))}
                   onChange={(options) => field.onChange(options.map(o => o.value))}
                   onCreateOption={handleCreateOption('target_models')}
-                  placeholder="Select or create models..."
+                  placeholder={t('form.selectOrCreateModels')}
                 />
               )}
             />
             {typeof errors.target_models?.message === 'string' && <p className="text-red-500">{errors.target_models.message}</p>}
           </div>
           <div>
-            <label htmlFor="use_cases" className="block text-sm font-medium text-gray-700">Use Cases</label>
+            <label htmlFor="use_cases" className="block text-sm font-medium text-gray-700">{t('form.useCases')}</label>
             <Controller name="use_cases" control={control} render={({ field }) => (
                 <CreatableMultiSelect isLoading={lookups.loading} options={lookups.use_cases} value={lookups.use_cases.filter(o => field.value?.includes(o.value))} onChange={(options) => field.onChange(options.map(o => o.value))} onCreateOption={handleCreateOption('use_cases')} />
             )} />
             {typeof errors.use_cases?.message === 'string' && <p className="text-red-500">{errors.use_cases.message}</p>}
           </div>
           <div>
-            <label htmlFor="providers" className="block text-sm font-medium text-gray-700">Providers{help.providers && (
+            <label htmlFor="providers" className="block text-sm font-medium text-gray-700">{t('form.providers')}{help.providers && (
               <RadixTooltip content={help.providers}>
                 <span className="ml-1 text-gray-400 cursor-help" role="img" aria-label="Information">ⓘ</span>
               </RadixTooltip>
@@ -215,7 +217,7 @@ const ManualPromptForm = ({ onClose, readOnly = false }: ManualPromptFormProps) 
           </div>
           <div>
             <label htmlFor="integrations" className="block text-sm font-medium text-gray-700">
-              Integrations
+              {t('form.integrations')}
               {help.integrations && (
                 <RadixTooltip content={help.integrations}>
                   <span className="ml-1 text-gray-400 cursor-help" role="img" aria-label="Information">ⓘ</span>
@@ -231,10 +233,10 @@ const ManualPromptForm = ({ onClose, readOnly = false }: ManualPromptFormProps) 
             {typeof errors.integrations?.message === 'string' && <p className="text-red-500">{errors.integrations.message}</p>}
           </div>
           <div>
-            <label htmlFor="tags" className="block text-sm font-medium text-gray-700">Tags</label>
+            <label htmlFor="tags" className="block text-sm font-medium text-gray-700">{t('form.tags')}</label>
             <Controller name="tags" control={control} render={({ field }) => (
                 <TagInput tags={field.value?.map((t: string) => ({id: t, text: t, className: ''})) || []}
-                  setTags={(newTags) => field.onChange(newTags.map(t => t.text))} placeholder="Add tags..."
+                  setTags={(newTags) => field.onChange(newTags.map(t => t.text))} placeholder={t('form.addTags')}
                 />
             )} />
             {typeof errors.tags?.message === 'string' && <p className="text-red-500">{errors.tags.message}</p>}
@@ -245,17 +247,17 @@ const ManualPromptForm = ({ onClose, readOnly = false }: ManualPromptFormProps) 
       {activeTab === 'advanced' && (
         <div className="space-y-4">
           <div>
-            <label htmlFor="input_schema" className="block text-sm font-medium text-gray-700">Input Schema</label>
+            <label htmlFor="input_schema" className="block text-sm font-medium text-gray-700">{t('form.inputSchema')}</label>
             <textarea id="input_schema" {...register('input_schema')} className="block w-full mt-1 text-black border-gray-300 rounded-md shadow-md" />
             {errors.input_schema && <p className="text-red-500">{errors.input_schema.message as string}</p>}
           </div>
           <div>
-            <label htmlFor="llm_parameters" className="block text-sm font-medium text-gray-700">LLM Parameters</label>
+            <label htmlFor="llm_parameters" className="block text-sm font-medium text-gray-700">{t('form.llmParameters')}</label>
             <textarea id="llm_parameters" {...register('llm_parameters')} className="block w-full mt-1 text-black border-gray-300 rounded-md shadow-md" />
             {errors.llm_parameters && <p className="text-red-500">{errors.llm_parameters.message as string}</p>}
           </div>
           <div>
-            <label htmlFor="sample_input" className="block text-sm font-medium text-gray-700">Sample Input</label>
+            <label htmlFor="sample_input" className="block text-sm font-medium text-gray-700">{t('form.sampleInput')}</label>
             <LanguageSelect
               value={sampleInputLanguage}
               onChange={(lang) => {
@@ -279,7 +281,7 @@ const ManualPromptForm = ({ onClose, readOnly = false }: ManualPromptFormProps) 
             {errors.sample_input && <p className="text-red-500">{errors.sample_input.message as string}</p>}
           </div>
           <div>
-            <label htmlFor="sample_output" className="block text-sm font-medium text-gray-700">Sample Output</label>
+            <label htmlFor="sample_output" className="block text-sm font-medium text-gray-700">{t('form.sampleOutput')}</label>
             <LanguageSelect
               value={sampleOutputLanguage}
               onChange={(lang) => {
@@ -303,9 +305,9 @@ const ManualPromptForm = ({ onClose, readOnly = false }: ManualPromptFormProps) 
             {typeof errors.sample_output?.message === 'string' && <p className="text-red-500">{errors.sample_output.message}</p>}
           </div>
           <div>
-            <label htmlFor="related_prompt_ids" className="block text-sm font-medium text-gray-700">Related Prompt IDs</label>
+            <label htmlFor="related_prompt_ids" className="block text-sm font-medium text-gray-700">{t('form.relatedPromptIds')}</label>
             <Controller name="related_prompt_ids" control={control} render={({ field }) => (
-                <TagInput tags={field.value?.map((t: string) => ({ id: t, text: t, className: '' })) || []} setTags={(newTags) => field.onChange(newTags.map(t => t.text))} placeholder="Add prompt IDs..." />
+                <TagInput tags={field.value?.map((t: string) => ({ id: t, text: t, className: '' })) || []} setTags={(newTags) => field.onChange(newTags.map(t => t.text))} placeholder={t('form.addPromptIds')} />
             )} />
             {typeof errors.related_prompt_ids?.message === 'string' && <p className="text-red-500">{errors.related_prompt_ids.message}</p>}
           </div>
@@ -315,33 +317,33 @@ const ManualPromptForm = ({ onClose, readOnly = false }: ManualPromptFormProps) 
       {activeTab === 'governance' && (
         <div className="space-y-4">
           <div>
-            <label htmlFor="category" className="block text-sm font-medium text-gray-700">Category</label>
+            <label htmlFor="category" className="block text-sm font-medium text-gray-700">{t('form.category')}</label>
             <input id="category" {...register('category')} className="block w-full mt-1 text-black border-gray-300 rounded-md shadow-md" />
             {typeof errors.category?.message === 'string' && <p className="text-red-500">{errors.category.message}</p>}
           </div>
           <div>
-            <label htmlFor="complexity" className="block text-sm font-medium text-gray-700">Complexity</label>
+            <label htmlFor="complexity" className="block text-sm font-medium text-gray-700">{t('form.complexity')}</label>
             <input id="complexity" {...register('complexity')} className="block w-full mt-1 text-black border-gray-300 rounded-md shadow-md" />
             {typeof errors.complexity?.message === 'string' && <p className="text-red-500">{errors.complexity.message}</p>}
           </div>
           <div>
-            <label htmlFor="audience" className="block text-sm font-medium text-gray-700">Audience</label>
+            <label htmlFor="audience" className="block text-sm font-medium text-gray-700">{t('form.audience')}</label>
             <input id="audience" {...register('audience')} className="block w-full mt-1 text-black border-gray-300 rounded-md shadow-md" />
             {typeof errors.audience?.message === 'string' && <p className="text-red-500">{errors.audience.message}</p>}
           </div>
           <div>
-            <label htmlFor="status" className="block text-sm font-medium text-gray-700">Status</label>
+            <label htmlFor="status" className="block text-sm font-medium text-gray-700">{t('form.status')}</label>
             <input id="status" {...register('status')} className="block w-full mt-1 text-black border-gray-300 rounded-md shadow-md" />
             {typeof errors.status?.message === 'string' && <p className="text-red-500">{errors.status.message}</p>}
           </div>
           <div>
-            <label htmlFor="link" className="block text-sm font-medium text-gray-700">Link</label>
+            <label htmlFor="link" className="block text-sm font-medium text-gray-700">{t('form.link')}</label>
             <input id="link" {...register('link')} className="block w-full mt-1 text-black border-gray-300 rounded-md shadow-md" />
             {typeof errors.link?.message === 'string' && <p className="text-red-500">{errors.link.message}</p>}
           </div>
           <div>
             <label htmlFor="access_control" className="block text-sm font-medium text-gray-700">
-              Access Control
+              {t('form.accessControl')}
             </label>
             <select
               id="access_control"
@@ -365,13 +367,13 @@ const ManualPromptForm = ({ onClose, readOnly = false }: ManualPromptFormProps) 
           onClick={onClose}
           className="px-4 py-2 mr-2 text-gray-700 bg-gray-200 rounded hover:bg-gray-300"
         >
-          Cancel
+          {t('form.cancel')}
         </button>
         <button
           type="submit"
           className="px-4 py-2 font-bold text-white bg-blue-500 rounded hover:bg-blue-700"
         >
-          Submit
+          {t('form.submit')}
         </button>
       </div>
     </form>
