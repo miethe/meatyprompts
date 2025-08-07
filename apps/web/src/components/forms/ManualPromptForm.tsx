@@ -173,16 +173,40 @@ const ManualPromptForm = ({ onClose }: ManualPromptFormProps) => {
             {typeof errors.providers?.message === 'string' && <p className="text-red-500">{errors.providers.message}</p>}
           </div>
           <div>
-            <label htmlFor="integrations" className="block text-sm font-medium text-gray-700">Integrations{help.integrations && (<span className="ml-1 text-gray-400 cursor-help" title={help.integrations}>ⓘ</span>)}</label>
+            <label htmlFor="integrations" className="block text-sm font-medium text-gray-700">
+              Integrations
+              {help.integrations && (
+                <>
+                  <span
+                    className="ml-1 text-gray-400 cursor-help"
+                    tabIndex={0}
+                    role="img"
+                    aria-label="Information"
+                    aria-describedby="integrations-help"
+                    title={help.integrations}
+                  >
+                    ⓘ
+                  </span>
+                  <span id="integrations-help" className="sr-only">
+                    {help.integrations}
+                  </span>
+                </>
+              )}
+            </label>
             <Controller name="integrations" control={control} render={({ field }) => (
-                <CreatableMultiSelect isLoading={lookups.loading} options={lookups.integrations} value={lookups.integrations.filter(o => field.value?.includes(o.value))} onChange={(options) => field.onChange(options.map(o => o.value))} onCreateOption={handleCreateOption('integrations')} />
+                <CreatableMultiSelect isLoading={lookups.loading} options={lookups.integrations}
+                  value={lookups.integrations.filter(o => field.value?.includes(o.value))} onChange={(options) =>
+                  field.onChange(options.map(o => o.value))} onCreateOption={handleCreateOption('integrations')}
+                />
             )} />
             {typeof errors.integrations?.message === 'string' && <p className="text-red-500">{errors.integrations.message}</p>}
           </div>
           <div>
             <label htmlFor="tags" className="block text-sm font-medium text-gray-700">Tags</label>
             <Controller name="tags" control={control} render={({ field }) => (
-                <TagInput tags={field.value?.map((t: string) => ({id: t, text: t, className: ''})) || []} setTags={(newTags) => field.onChange(newTags.map(t => t.text))} placeholder="Add tags..." />
+                <TagInput tags={field.value?.map((t: string) => ({id: t, text: t, className: ''})) || []}
+                  setTags={(newTags) => field.onChange(newTags.map(t => t.text))} placeholder="Add tags..."
+                />
             )} />
             {typeof errors.tags?.message === 'string' && <p className="text-red-500">{errors.tags.message}</p>}
           </div>
@@ -249,8 +273,14 @@ const ManualPromptForm = ({ onClose }: ManualPromptFormProps) => {
             {typeof errors.link?.message === 'string' && <p className="text-red-500">{errors.link.message}</p>}
           </div>
           <div>
-            <label htmlFor="access_control" className="block text-sm font-medium text-gray-700">Access Control</label>
-            <select id="access_control" {...register('access_control')} className="block w-full mt-1 text-black border-gray-300 rounded-md shadow-md">
+            <label htmlFor="access_control" className="block text-sm font-medium text-gray-700">
+              Access Control
+            </label>
+            <select
+              id="access_control"
+              {...register('access_control')}
+              className="block w-full mt-1 text-black border-gray-300 rounded-md shadow-md"
+            >
               <option value="public">Public</option>
               <option value="private">Private</option>
               <option value="team-only">Team Only</option>
