@@ -1,0 +1,12 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"type": "shell",
+			"label": "dev:web",
+			"command": "pnpm --filter @meatyprompts/web dev",
+			"isBackground": true,
+			"group": "build"
+		}
+	]
+}
