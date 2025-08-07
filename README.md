@@ -42,10 +42,15 @@ discovery and reuse.  Each prompt captures:
 * **access_control** – one of `public`, `private`, `team-only`, or
   `role-based`.
 * Optional details such as target models, providers, integrations,
-  audience, input/output samples and related prompt links.
+  category, complexity, audience, status, input schemas, LLM parameters,
+  sample inputs/outputs, related prompt links, and reference URLs.
 
 Timestamps for creation and last modification are managed by the
 database.  See the OpenAPI docs for the full schema.
+
+## Field Help
+
+Tooltip text for form fields such as target models, providers, and integrations is configured in `config/field_help.json` and available from the `/api/v1/metadata/fields` endpoint.
 
 ## License
 
