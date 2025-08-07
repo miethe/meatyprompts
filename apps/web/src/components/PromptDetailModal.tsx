@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import CodeEditor, { LANGUAGE_OPTIONS, Language } from './CodeEditor';
 import {
   Dialog,
   DialogContent,
@@ -13,6 +14,7 @@ import { Button } from './ui/button'; // Assuming shadcn button is in ui/button
 interface Prompt {
   title: string;
   body: string;
+  output_format?: string;
   sample_input?: Record<string, unknown>;
   sample_output?: Record<string, unknown>;
   related_prompt_ids?: string[];
@@ -29,6 +31,7 @@ interface PromptDetailModalProps {
 const PromptDetailModal: React.FC<PromptDetailModalProps> = ({ prompt, isOpen, onClose, onSave }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [editedPrompt, setEditedPrompt] = useState<Prompt>(prompt);
+  const [language, setLanguage] = useState<Language>((prompt.output_format as Language) || 'plaintext');
 
   const handleSave = () => {
     onSave(editedPrompt);
@@ -63,12 +66,33 @@ const PromptDetailModal: React.FC<PromptDetailModalProps> = ({ prompt, isOpen, o
           </div>
 
           {/* Body */}
-           <div className="grid grid-cols-4 items-center gap-4">
-            <label htmlFor="body" className="text-right">Body</label>
+          <div className="grid grid-cols-4 items-start gap-4">
+            <label htmlFor="body" className="text-right mt-2">Body</label>
             {isEditing ? (
-              <textarea id="body" value={editedPrompt.body} onChange={(e) => setEditedPrompt({...editedPrompt, body: e.target.value})} className="col-span-3 p-2 border rounded h-24" />
+              <div className="col-span-3">
+                <select
+                  className="mb-2 p-2 border rounded"
+                  value={language}
+                  onChange={(e) => {
+                    const lang = e.target.value as Language;
+                    setLanguage(lang);
+                    setEditedPrompt({ ...editedPrompt, output_format: lang });
+                  }}
+                >
+                  {LANGUAGE_OPTIONS.map((opt) => (
+                    <option key={opt} value={opt}>{opt}</option>
+                  ))}
+                </select>
+                <CodeEditor
+                  value={editedPrompt.body}
+                  language={language}
+                  onChange={(val) => setEditedPrompt({ ...editedPrompt, body: val })}
+                />
+              </div>
             ) : (
-              <p className="col-span-3 whitespace-pre-wrap">{prompt.body}</p>
+              <div className="col-span-3">
+                <p className="whitespace-pre-wrap">{prompt.body}</p>
+              </div>
             )}
           </div>
 
@@ -76,17 +100,18 @@ const PromptDetailModal: React.FC<PromptDetailModalProps> = ({ prompt, isOpen, o
           <div className="grid grid-cols-4 items-start gap-4">
             <label htmlFor="sample_input" className="text-right mt-2">Sample Input</label>
             {isEditing ? (
-              <textarea
-                id="sample_input"
-                value={JSON.stringify(editedPrompt.sample_input ?? {}, null, 2)}
-                onChange={(e) =>
-                  setEditedPrompt({
-                    ...editedPrompt,
-                    sample_input: JSON.parse(e.target.value || '{}'),
-                  })
-                }
-                className="col-span-3 p-2 border rounded h-24"
-              />
+              <div className="col-span-3">
+                <CodeEditor
+                  value={JSON.stringify(editedPrompt.sample_input ?? {}, null, 2)}
+                  language="json"
+                  onChange={(val) =>
+                    setEditedPrompt({
+                      ...editedPrompt,
+                      sample_input: JSON.parse(val || '{}'),
+                    })
+                  }
+                />
+              </div>
             ) : (
               <pre className="col-span-3 whitespace-pre-wrap text-sm">
                 {JSON.stringify(prompt.sample_input, null, 2)}
@@ -98,17 +123,18 @@ const PromptDetailModal: React.FC<PromptDetailModalProps> = ({ prompt, isOpen, o
           <div className="grid grid-cols-4 items-start gap-4">
             <label htmlFor="sample_output" className="text-right mt-2">Sample Output</label>
             {isEditing ? (
-              <textarea
-                id="sample_output"
-                value={JSON.stringify(editedPrompt.sample_output ?? {}, null, 2)}
-                onChange={(e) =>
-                  setEditedPrompt({
-                    ...editedPrompt,
-                    sample_output: JSON.parse(e.target.value || '{}'),
-                  })
-                }
-                className="col-span-3 p-2 border rounded h-24"
-              />
+              <div className="col-span-3">
+                <CodeEditor
+                  value={JSON.stringify(editedPrompt.sample_output ?? {}, null, 2)}
+                  language="json"
+                  onChange={(val) =>
+                    setEditedPrompt({
+                      ...editedPrompt,
+                      sample_output: JSON.parse(val || '{}'),
+                    })
+                  }
+                />
+              </div>
             ) : (
               <pre className="col-span-3 whitespace-pre-wrap text-sm">
                 {JSON.stringify(prompt.sample_output, null, 2)}

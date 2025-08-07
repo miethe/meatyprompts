@@ -7,6 +7,7 @@ import { usePrompt } from '@/contexts/PromptContext';
 import CreatableMultiSelect from '../form/CreatableMultiSelect';
 import TagInput from '../form/TagInput';
 import { useLookups } from '@/contexts/LookupContext';
+import CodeEditor, { LANGUAGE_OPTIONS, Language } from '../CodeEditor';
 
 const schema = z.object({
   title: z.string().min(1, 'Title is required'),
@@ -16,6 +17,7 @@ const schema = z.object({
   integrations: z.array(z.string()).optional(),
   tags: z.array(z.string()).optional(),
   body: z.string().min(1, 'Prompt text is required'),
+  output_format: z.string().optional(),
   access_control: z.enum(['public', 'private', 'team-only', 'role-based']),
 });
 
@@ -28,6 +30,7 @@ const ManualPromptForm = ({ onClose }) => {
     register,
     handleSubmit,
     control,
+    setValue,
     formState: { errors },
   } = useForm<ManualPromptInput>({
     resolver: zodResolver(schema),
@@ -37,8 +40,12 @@ const ManualPromptForm = ({ onClose }) => {
       integrations: [],
       use_cases: [],
       tags: [],
+      body: '',
+      output_format: 'plaintext',
     }
   });
+
+  const [language, setLanguage] = useState<Language>('plaintext');
 
   const onSubmit = async (data: ManualPromptInput) => {
     console.log('ManualPromptForm submitted:', data);
@@ -73,11 +80,31 @@ const ManualPromptForm = ({ onClose }) => {
         <label htmlFor="body" className="block text-sm font-medium text-gray-700">
           Prompt Text
         </label>
-        <textarea
-          id="body"
-          {...register('body')}
-          className="block w-full mt-1 text-black border-gray-300 rounded-md shadow-md"
+        <select
+          className="mt-1 mb-2 text-black border-gray-300 rounded-md"
+          value={language}
+          onChange={(e) => {
+            const lang = e.target.value as Language;
+            setLanguage(lang);
+            setValue('output_format', lang);
+          }}
+        >
+          {LANGUAGE_OPTIONS.map((opt) => (
+            <option key={opt} value={opt}>{opt}</option>
+          ))}
+        </select>
+        <Controller
+          name="body"
+          control={control}
+          render={({ field }) => (
+            <CodeEditor
+              value={field.value}
+              language={language}
+              onChange={field.onChange}
+            />
+          )}
         />
+        <input type="hidden" {...register('output_format')} />
         {errors.body && <p className="text-red-500">{errors.body.message}</p>}
       </div>
 
