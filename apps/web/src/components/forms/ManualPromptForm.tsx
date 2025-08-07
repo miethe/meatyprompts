@@ -20,7 +20,16 @@ const jsonField = z
       return false;
     }
   }, { message: 'Invalid JSON' })
-  .transform(val => (val && val.trim() !== '' ? JSON.parse(val) : undefined));
+  .transform(val => {
+    if (val && val.trim() !== '') {
+      try {
+        return JSON.parse(val);
+      } catch {
+        return undefined;
+      }
+    }
+    return undefined;
+  });
 
 export const manualPromptFormSchema = z.object({
   title: z.string().min(1, 'Title is required'),
@@ -43,7 +52,11 @@ export const manualPromptFormSchema = z.object({
   access_control: z.enum(['public', 'private', 'team-only', 'role-based']),
 });
 
-const ManualPromptForm = ({ onClose }) => {
+type ManualPromptFormProps = {
+  onClose: () => void;
+};
+
+const ManualPromptForm = ({ onClose }: ManualPromptFormProps) => {
   const { createPrompt } = usePrompt();
   const { lookups, addLookup } = useLookups();
   const [activeTab, setActiveTab] = useState<'basic' | 'advanced' | 'governance'>('basic');
@@ -93,9 +106,9 @@ const ManualPromptForm = ({ onClose }) => {
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
       <div className="flex mb-4 space-x-4 border-b">
-        <button type="button" onClick={() => setActiveTab('basic')} className={`px-3 py-1 ${activeTab === 'basic' ? 'border-b-2 border-blue-500' : ''}`}>Basic</button>
-        <button type="button" onClick={() => setActiveTab('advanced')} className={`px-3 py-1 ${activeTab === 'advanced' ? 'border-b-2 border-blue-500' : ''}`}>Advanced</button>
-        <button type="button" onClick={() => setActiveTab('governance')} className={`px-3 py-1 ${activeTab === 'governance' ? 'border-b-2 border-blue-500' : ''}`}>Governance</button>
+        <button type="button" onClick={() => setActiveTab('basic')} className={`px-3 py-1 text-black ${activeTab === 'basic' ? 'border-b-2 border-blue-500' : ''}`}>Basic</button>
+        <button type="button" onClick={() => setActiveTab('advanced')} className={`px-3 py-1 text-black ${activeTab === 'advanced' ? 'border-b-2 border-blue-500' : ''}`}>Advanced</button>
+        <button type="button" onClick={() => setActiveTab('governance')} className={`px-3 py-1 text-black ${activeTab === 'governance' ? 'border-b-2 border-blue-500' : ''}`}>Governance</button>
       </div>
 
       {activeTab === 'basic' && (
@@ -109,7 +122,7 @@ const ManualPromptForm = ({ onClose }) => {
               {...register('title')}
               className="block w-full mt-1 text-black border-gray-300 rounded-md shadow-md"
             />
-            {errors.title && <p className="text-red-500">{errors.title.message}</p>}
+            {typeof errors.title?.message === 'string' && <p className="text-red-500">{errors.title.message}</p>}
           </div>
           <div>
             <label htmlFor="body" className="block text-sm font-medium text-gray-700">
@@ -120,7 +133,7 @@ const ManualPromptForm = ({ onClose }) => {
               {...register('body')}
               className="block w-full mt-1 text-black border-gray-300 rounded-md shadow-md"
             />
-            {errors.body && <p className="text-red-500">{errors.body.message}</p>}
+            {typeof errors.body?.message === 'string' && <p className="text-red-500">{errors.body.message}</p>}
           </div>
           <div>
             <label htmlFor="target_models" className="block text-sm font-medium text-gray-700">
@@ -140,35 +153,35 @@ const ManualPromptForm = ({ onClose }) => {
                 />
               )}
             />
-            {errors.target_models && <p className="text-red-500">{errors.target_models.message}</p>}
+            {typeof errors.target_models?.message === 'string' && <p className="text-red-500">{errors.target_models.message}</p>}
           </div>
           <div>
             <label htmlFor="use_cases" className="block text-sm font-medium text-gray-700">Use Cases</label>
             <Controller name="use_cases" control={control} render={({ field }) => (
                 <CreatableMultiSelect isLoading={lookups.loading} options={lookups.use_cases} value={lookups.use_cases.filter(o => field.value?.includes(o.value))} onChange={(options) => field.onChange(options.map(o => o.value))} onCreateOption={handleCreateOption('use_cases')} />
             )} />
-            {errors.use_cases && <p className="text-red-500">{errors.use_cases.message}</p>}
+            {typeof errors.use_cases?.message === 'string' && <p className="text-red-500">{errors.use_cases.message}</p>}
           </div>
           <div>
             <label htmlFor="providers" className="block text-sm font-medium text-gray-700">Providers</label>
             <Controller name="providers" control={control} render={({ field }) => (
                 <CreatableMultiSelect isLoading={lookups.loading} options={lookups.providers} value={lookups.providers.filter(o => field.value?.includes(o.value))} onChange={(options) => field.onChange(options.map(o => o.value))} onCreateOption={handleCreateOption('providers')} />
             )} />
-            {errors.providers && <p className="text-red-500">{errors.providers.message}</p>}
+            {typeof errors.providers?.message === 'string' && <p className="text-red-500">{errors.providers.message}</p>}
           </div>
           <div>
             <label htmlFor="integrations" className="block text-sm font-medium text-gray-700">Integrations</label>
             <Controller name="integrations" control={control} render={({ field }) => (
                 <CreatableMultiSelect isLoading={lookups.loading} options={lookups.integrations} value={lookups.integrations.filter(o => field.value?.includes(o.value))} onChange={(options) => field.onChange(options.map(o => o.value))} onCreateOption={handleCreateOption('integrations')} />
             )} />
-            {errors.integrations && <p className="text-red-500">{errors.integrations.message}</p>}
+            {typeof errors.integrations?.message === 'string' && <p className="text-red-500">{errors.integrations.message}</p>}
           </div>
           <div>
             <label htmlFor="tags" className="block text-sm font-medium text-gray-700">Tags</label>
             <Controller name="tags" control={control} render={({ field }) => (
-                <TagInput tags={field.value?.map(t => ({id: t, text: t, className: ''})) || []} setTags={(newTags) => field.onChange(newTags.map(t => t.text))} placeholder="Add tags..." />
+                <TagInput tags={field.value?.map((t: string) => ({id: t, text: t, className: ''})) || []} setTags={(newTags) => field.onChange(newTags.map(t => t.text))} placeholder="Add tags..." />
             )} />
-            {errors.tags && <p className="text-red-500">{errors.tags.message}</p>}
+            {typeof errors.tags?.message === 'string' && <p className="text-red-500">{errors.tags.message}</p>}
           </div>
         </div>
       )}
@@ -193,14 +206,14 @@ const ManualPromptForm = ({ onClose }) => {
           <div>
             <label htmlFor="sample_output" className="block text-sm font-medium text-gray-700">Sample Output</label>
             <textarea id="sample_output" {...register('sample_output')} className="block w-full mt-1 text-black border-gray-300 rounded-md shadow-md" />
-            {errors.sample_output && <p className="text-red-500">{errors.sample_output.message as string}</p>}
+            {typeof errors.sample_output?.message === 'string' && <p className="text-red-500">{errors.sample_output.message}</p>}
           </div>
           <div>
             <label htmlFor="related_prompt_ids" className="block text-sm font-medium text-gray-700">Related Prompt IDs</label>
             <Controller name="related_prompt_ids" control={control} render={({ field }) => (
-                <TagInput tags={field.value?.map(t => ({ id: t, text: t, className: '' })) || []} setTags={(newTags) => field.onChange(newTags.map(t => t.text))} placeholder="Add prompt IDs..." />
+                <TagInput tags={field.value?.map((t: string) => ({ id: t, text: t, className: '' })) || []} setTags={(newTags) => field.onChange(newTags.map(t => t.text))} placeholder="Add prompt IDs..." />
             )} />
-            {errors.related_prompt_ids && <p className="text-red-500">{errors.related_prompt_ids.message as string}</p>}
+            {typeof errors.related_prompt_ids?.message === 'string' && <p className="text-red-500">{errors.related_prompt_ids.message}</p>}
           </div>
         </div>
       )}
@@ -210,27 +223,27 @@ const ManualPromptForm = ({ onClose }) => {
           <div>
             <label htmlFor="category" className="block text-sm font-medium text-gray-700">Category</label>
             <input id="category" {...register('category')} className="block w-full mt-1 text-black border-gray-300 rounded-md shadow-md" />
-            {errors.category && <p className="text-red-500">{errors.category.message}</p>}
+            {typeof errors.category?.message === 'string' && <p className="text-red-500">{errors.category.message}</p>}
           </div>
           <div>
             <label htmlFor="complexity" className="block text-sm font-medium text-gray-700">Complexity</label>
             <input id="complexity" {...register('complexity')} className="block w-full mt-1 text-black border-gray-300 rounded-md shadow-md" />
-            {errors.complexity && <p className="text-red-500">{errors.complexity.message}</p>}
+            {typeof errors.complexity?.message === 'string' && <p className="text-red-500">{errors.complexity.message}</p>}
           </div>
           <div>
             <label htmlFor="audience" className="block text-sm font-medium text-gray-700">Audience</label>
             <input id="audience" {...register('audience')} className="block w-full mt-1 text-black border-gray-300 rounded-md shadow-md" />
-            {errors.audience && <p className="text-red-500">{errors.audience.message}</p>}
+            {typeof errors.audience?.message === 'string' && <p className="text-red-500">{errors.audience.message}</p>}
           </div>
           <div>
             <label htmlFor="status" className="block text-sm font-medium text-gray-700">Status</label>
             <input id="status" {...register('status')} className="block w-full mt-1 text-black border-gray-300 rounded-md shadow-md" />
-            {errors.status && <p className="text-red-500">{errors.status.message}</p>}
+            {typeof errors.status?.message === 'string' && <p className="text-red-500">{errors.status.message}</p>}
           </div>
           <div>
             <label htmlFor="link" className="block text-sm font-medium text-gray-700">Link</label>
             <input id="link" {...register('link')} className="block w-full mt-1 text-black border-gray-300 rounded-md shadow-md" />
-            {errors.link && <p className="text-red-500">{errors.link.message}</p>}
+            {typeof errors.link?.message === 'string' && <p className="text-red-500">{errors.link.message}</p>}
           </div>
           <div>
             <label htmlFor="access_control" className="block text-sm font-medium text-gray-700">Access Control</label>
@@ -240,7 +253,7 @@ const ManualPromptForm = ({ onClose }) => {
               <option value="team-only">Team Only</option>
               <option value="role-based">Role Based</option>
             </select>
-            {errors.access_control && <p className="text-red-500">{errors.access_control.message}</p>}
+            {typeof errors.access_control?.message === 'string' && <p className="text-red-500">{errors.access_control.message}</p>}
           </div>
         </div>
       )}

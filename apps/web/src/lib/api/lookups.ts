@@ -9,9 +9,17 @@ interface Lookup {
   value: string;
 }
 
+const lookupTypeMap: Record<LookupType, string> = {
+  target_models: 'models',
+  providers: 'platforms',
+  integrations: 'tools',
+  use_cases: 'purposes',
+};
+
 export const getLookups = async (type: LookupType): Promise<Lookup[]> => {
   try {
-    const response = await axios.get(`${API_BASE_URL}/api/v1/lookups/${type}`);
+    const backendType = lookupTypeMap[type] || type;
+    const response = await axios.get(`${API_BASE_URL}/api/v1/lookups/${backendType}`);
     return response.data;
   } catch (error) {
     console.error(`Failed to fetch ${type}:`, error);
@@ -21,7 +29,8 @@ export const getLookups = async (type: LookupType): Promise<Lookup[]> => {
 
 export const createLookup = async (type: LookupType, value: string): Promise<Lookup | null> => {
   try {
-    const response = await axios.post(`${API_BASE_URL}/api/v1/lookups/${type}`, { value });
+    const backendType = lookupTypeMap[type] || type;
+    const response = await axios.post(`${API_BASE_URL}/api/v1/lookups/${backendType}`, { value });
     return response.data;
   } catch (error) {
     console.error(`Failed to create ${type}:`, error);
