@@ -10,6 +10,7 @@ import { useLookups } from '@/contexts/LookupContext';
 import CodeEditor, { LANGUAGE_OPTIONS, Language } from '../CodeEditor';
 import { useFieldHelp } from '@/contexts/FieldHelpContext';
 import RadixTooltip from '../ui/RadixTooltip';
+import LanguageSelect from '../form/LanguageSelect';
 
 const jsonField = z
   .string()
@@ -53,22 +54,21 @@ export const manualPromptFormSchema = z.object({
   related_prompt_ids: z.array(z.string()).optional(),
   link: z.string().optional(),
   output_format: z.string().optional(),
+  sample_input_language: z.string().optional(),
+  sample_output_language: z.string().optional(),
   access_control: z.enum(['public', 'private', 'team-only', 'role-based']),
 });
 
 type ManualPromptFormProps = {
   onClose: () => void;
+  readOnly?: boolean;
 };
 
-const ManualPromptForm = ({ onClose }: ManualPromptFormProps) => {
+const ManualPromptForm = ({ onClose, readOnly = false }: ManualPromptFormProps) => {
   const { createPrompt } = usePrompt();
   const { lookups, addLookup } = useLookups();
   const [activeTab, setActiveTab] = useState<'basic' | 'advanced' | 'governance'>('basic');
   const { help } = useFieldHelp();
-
-  type ManualPromptFormProps = {
-    onClose: () => void;
-  };
 
   const {
     register,
@@ -97,10 +97,14 @@ const ManualPromptForm = ({ onClose }: ManualPromptFormProps) => {
       access_control: 'public',
       body: '',
       output_format: 'plaintext',
+      sample_input_language: 'json',
+      sample_output_language: 'json',
     }
   });
 
-  const [language, setLanguage] = useState<Language>('plaintext');
+  const [language, setLanguage] = useState<Language>(control._defaultValues.output_format || 'plaintext');
+  const [sampleInputLanguage, setSampleInputLanguage] = useState<Language>(control._defaultValues.sample_input_language || 'json');
+  const [sampleOutputLanguage, setSampleOutputLanguage] = useState<Language>(control._defaultValues.sample_output_language || 'json');
 
   const onSubmit = async (data: ManualPromptInput) => {
     console.log('ManualPromptForm submitted:', data);
@@ -135,6 +139,8 @@ const ManualPromptForm = ({ onClose }: ManualPromptFormProps) => {
               id="title"
               {...register('title')}
               className="block w-full mt-1 text-black border-gray-300 rounded-md shadow-md"
+              readOnly={readOnly}
+              disabled={readOnly}
             />
             {typeof errors.title?.message === 'string' && <p className="text-red-500">{errors.title.message}</p>}
           </div>
@@ -142,19 +148,14 @@ const ManualPromptForm = ({ onClose }: ManualPromptFormProps) => {
             <label htmlFor="body" className="block text-sm font-medium text-gray-700">
               Prompt Text
             </label>
-            <select
-              className="mt-1 mb-2 text-black border-gray-300 rounded-md"
+            <LanguageSelect
               value={language}
-              onChange={(e) => {
-                const lang = e.target.value as Language;
+              onChange={(lang) => {
                 setLanguage(lang);
                 setValue('output_format', lang);
               }}
-            >
-              {LANGUAGE_OPTIONS.map((opt) => (
-                <option key={opt} value={opt}>{opt}</option>
-              ))}
-            </select>
+              disabled={readOnly}
+            />
             <Controller
               name="body"
               control={control}
@@ -163,6 +164,7 @@ const ManualPromptForm = ({ onClose }: ManualPromptFormProps) => {
                   value={field.value}
                   language={language}
                   onChange={field.onChange}
+                  readOnly={readOnly}
                 />
               )}
             />
@@ -254,12 +256,50 @@ const ManualPromptForm = ({ onClose }: ManualPromptFormProps) => {
           </div>
           <div>
             <label htmlFor="sample_input" className="block text-sm font-medium text-gray-700">Sample Input</label>
-            <textarea id="sample_input" {...register('sample_input')} className="block w-full mt-1 text-black border-gray-300 rounded-md shadow-md" />
+            <LanguageSelect
+              value={sampleInputLanguage}
+              onChange={(lang) => {
+                setSampleInputLanguage(lang);
+                setValue('sample_input_language', lang);
+              }}
+              disabled={readOnly}
+            />
+            <Controller
+              name="sample_input"
+              control={control}
+              render={({ field }) => (
+                <CodeEditor
+                  value={field.value}
+                  language={sampleInputLanguage}
+                  onChange={field.onChange}
+                  readOnly={readOnly}
+                />
+              )}
+            />
             {errors.sample_input && <p className="text-red-500">{errors.sample_input.message as string}</p>}
           </div>
           <div>
             <label htmlFor="sample_output" className="block text-sm font-medium text-gray-700">Sample Output</label>
-            <textarea id="sample_output" {...register('sample_output')} className="block w-full mt-1 text-black border-gray-300 rounded-md shadow-md" />
+            <LanguageSelect
+              value={sampleOutputLanguage}
+              onChange={(lang) => {
+                setSampleOutputLanguage(lang);
+                setValue('sample_output_language', lang);
+              }}
+              disabled={readOnly}
+            />
+            <Controller
+              name="sample_output"
+              control={control}
+              render={({ field }) => (
+                <CodeEditor
+                  value={field.value}
+                  language={sampleOutputLanguage}
+                  onChange={field.onChange}
+                  readOnly={readOnly}
+                />
+              )}
+            />
             {typeof errors.sample_output?.message === 'string' && <p className="text-red-500">{errors.sample_output.message}</p>}
           </div>
           <div>

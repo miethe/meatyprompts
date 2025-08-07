@@ -2,11 +2,13 @@ import React from 'react';
 import { render, fireEvent, screen } from '@testing-library/react';
 import PromptDetailModal from '../PromptDetailModal';
 
-jest.mock('@uiw/react-codemirror', () => {
-  return ({ value, onChange }: { value: string; onChange: (val: string) => void }) => (
+jest.mock('@uiw/react-codemirror', () => ({
+  __esModule: true,
+  default: ({ value, onChange }: { value: string; onChange: (val: string) => void }) => (
     <textarea data-testid="codemirror" value={value} onChange={(e) => onChange(e.target.value)} />
-  );
-});
+  ),
+  lineNumbers: () => () => null,
+}));
 
 describe('PromptDetailModal', () => {
   const basePrompt = {
@@ -56,5 +58,20 @@ describe('PromptDetailModal', () => {
         sample_output: { bar: 2 },
       })
     );
+  });
+
+  it('copies body to clipboard', () => {
+    const writeText = jest.fn().mockResolvedValue(undefined);
+    Object.assign(navigator, { clipboard: { writeText } });
+    render(
+      <PromptDetailModal
+        prompt={basePrompt}
+        isOpen={true}
+        onClose={() => {}}
+        onSave={() => {}}
+      />
+    );
+    fireEvent.click(screen.getByLabelText('Copy to clipboard'));
+    expect(writeText).toHaveBeenCalledWith('initial');
   });
 });

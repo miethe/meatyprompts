@@ -45,7 +45,7 @@ Updates the latest version of a prompt.
 
 **Request Body:**
 
-Same as the `POST` request body.
+Same as the `POST` request body with optional `sample_input` and `sample_output` fields.
 
 **Response:**
 

@@ -31,9 +31,10 @@ interface CodeEditorProps {
   value: string;
   language: Language;
   onChange: (value: string) => void;
+  readOnly?: boolean;
 }
 
-const CodeEditor: React.FC<CodeEditorProps> = ({ value, language, onChange }) => {
+const CodeEditor: React.FC<CodeEditorProps> = ({ value, language, onChange, readOnly = false }) => {
   return (
     <CodeMirror
       value={value}
@@ -50,6 +51,7 @@ const CodeEditor: React.FC<CodeEditorProps> = ({ value, language, onChange }) =>
         // Automatically close brackets
         closeBrackets()
       ]}
+      editable={!readOnly}
       onChange={(val) => onChange(val)}
       className='text-black'
     />

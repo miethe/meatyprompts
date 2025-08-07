@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import CodeEditor, { LANGUAGE_OPTIONS, Language } from './CodeEditor';
+import CopyIconButton from './common/CopyIconButton';
 import {
   Dialog,
   DialogContent,
@@ -74,19 +75,22 @@ const PromptDetailModal: React.FC<PromptDetailModalProps> = ({ prompt, isOpen, o
             <label htmlFor="body" className="text-right mt-2">Body</label>
             {isEditing ? (
               <div className="col-span-3">
-                <select
-                  className="mb-2 p-2 border rounded"
-                  value={language}
-                  onChange={(e) => {
-                    const lang = e.target.value as Language;
-                    setLanguage(lang);
-                    setEditedPrompt({ ...editedPrompt, output_format: lang });
-                  }}
-                >
-                  {LANGUAGE_OPTIONS.map((opt) => (
-                    <option key={opt} value={opt}>{opt}</option>
-                  ))}
-                </select>
+                <div className="flex items-center mb-2">
+                  <select
+                    className="p-2 border rounded"
+                    value={language}
+                    onChange={(e) => {
+                      const lang = e.target.value as Language;
+                      setLanguage(lang);
+                      setEditedPrompt({ ...editedPrompt, output_format: lang });
+                    }}
+                  >
+                    {LANGUAGE_OPTIONS.map((opt) => (
+                      <option key={opt} value={opt}>{opt}</option>
+                    ))}
+                  </select>
+                  <CopyIconButton text={editedPrompt.body} />
+                </div>
                 <CodeEditor
                   value={editedPrompt.body}
                   language={language}
@@ -94,8 +98,9 @@ const PromptDetailModal: React.FC<PromptDetailModalProps> = ({ prompt, isOpen, o
                 />
               </div>
             ) : (
-              <div className="col-span-3">
-                <p className="whitespace-pre-wrap">{prompt.body}</p>
+              <div className="col-span-3 flex items-start">
+                <p className="whitespace-pre-wrap flex-1">{prompt.body}</p>
+                <CopyIconButton text={prompt.body} />
               </div>
             )}
           </div>
