@@ -8,6 +8,7 @@ import CreatableMultiSelect from '../form/CreatableMultiSelect';
 import TagInput from '../form/TagInput';
 import { useLookups } from '@/contexts/LookupContext';
 import { useFieldHelp } from '@/contexts/FieldHelpContext';
+import RadixTooltip from '../ui/RadixTooltip';
 
 const jsonField = z
   .string()
@@ -140,7 +141,11 @@ const ManualPromptForm = ({ onClose }: ManualPromptFormProps) => {
           </div>
           <div>
             <label htmlFor="target_models" className="block text-sm font-medium text-gray-700">
-              Target Models{help.target_models && (<span className="ml-1 text-gray-400 cursor-help" title={help.target_models}>ⓘ</span>)}
+              Target Models{help.target_models && (
+                <RadixTooltip content={help.target_models}>
+                  <span className="ml-1 text-gray-400 cursor-help" role="img" aria-label="Information">ⓘ</span>
+                </RadixTooltip>
+              )}
             </label>
             <Controller
               name="target_models"
@@ -166,7 +171,11 @@ const ManualPromptForm = ({ onClose }: ManualPromptFormProps) => {
             {typeof errors.use_cases?.message === 'string' && <p className="text-red-500">{errors.use_cases.message}</p>}
           </div>
           <div>
-            <label htmlFor="providers" className="block text-sm font-medium text-gray-700">Providers{help.providers && (<span className="ml-1 text-gray-400 cursor-help" title={help.providers}>ⓘ</span>)}</label>
+            <label htmlFor="providers" className="block text-sm font-medium text-gray-700">Providers{help.providers && (
+              <RadixTooltip content={help.providers}>
+                <span className="ml-1 text-gray-400 cursor-help" role="img" aria-label="Information">ⓘ</span>
+              </RadixTooltip>
+            )}</label>
             <Controller name="providers" control={control} render={({ field }) => (
                 <CreatableMultiSelect isLoading={lookups.loading} options={lookups.providers} value={lookups.providers.filter(o => field.value?.includes(o.value))} onChange={(options) => field.onChange(options.map(o => o.value))} onCreateOption={handleCreateOption('providers')} />
             )} />
@@ -176,21 +185,9 @@ const ManualPromptForm = ({ onClose }: ManualPromptFormProps) => {
             <label htmlFor="integrations" className="block text-sm font-medium text-gray-700">
               Integrations
               {help.integrations && (
-                <>
-                  <span
-                    className="ml-1 text-gray-400 cursor-help"
-                    tabIndex={0}
-                    role="img"
-                    aria-label="Information"
-                    aria-describedby="integrations-help"
-                    title={help.integrations}
-                  >
-                    ⓘ
-                  </span>
-                  <span id="integrations-help" className="sr-only">
-                    {help.integrations}
-                  </span>
-                </>
+                <RadixTooltip content={help.integrations}>
+                  <span className="ml-1 text-gray-400 cursor-help" role="img" aria-label="Information">ⓘ</span>
+                </RadixTooltip>
               )}
             </label>
             <Controller name="integrations" control={control} render={({ field }) => (
