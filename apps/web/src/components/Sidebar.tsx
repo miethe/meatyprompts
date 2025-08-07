@@ -1,11 +1,11 @@
-import React from 'react';
+import React, { useState } from 'react';
 import Link from 'next/link';
 import { Plus } from 'lucide-react';
-import { useRouter } from 'next/router';
 import ThemedButton from './common/ThemedButton';
+import NewPromptModal from './modals/NewPromptModal';
 
 const Sidebar = () => {
-  const router = useRouter();
+  const [modalOpen, setModalOpen] = useState(false);
 
   return (
     <div className="flex flex-col w-64 bg-gray-800">
@@ -34,9 +34,10 @@ const Sidebar = () => {
         <ThemedButton
           label="New Prompt"
           Icon={Plus}
-          onClick={() => router.push('/prompts/new')}
+          onClick={() => setModalOpen(true)}
         />
       </div>
+      {modalOpen && <NewPromptModal onClose={() => setModalOpen(false)} />}
     </div>
   );
 };

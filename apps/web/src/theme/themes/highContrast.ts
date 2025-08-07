@@ -3,7 +3,7 @@ export default {
     primary: '#000000',
     primaryHover: '#1F2937',
     background: '#FFFFFF',
-    text: '#000000',
+    text: '#FFFFFF',
   },
   borderRadius: '9999px',
 };
