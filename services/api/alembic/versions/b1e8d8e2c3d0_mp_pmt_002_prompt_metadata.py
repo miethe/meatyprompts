@@ -12,12 +12,16 @@ depends_on = None
 
 def upgrade() -> None:
     # prompts table
-    op.add_column('prompts', sa.Column('title', sa.String(), nullable=False))
+    op.add_column('prompts', sa.Column('title', sa.String(), nullable=True))
     op.add_column('prompts', sa.Column('tags', postgresql.ARRAY(sa.String()), nullable=True))
     op.add_column(
         'prompts',
         sa.Column('updated_at', sa.TIMESTAMP(timezone=True), server_default=sa.text('now()'), nullable=False),
     )
+    # Set a default value for existing rows
+    op.execute("UPDATE prompts SET title = 'Untitled' WHERE title IS NULL")
+    # Now alter the column to be NOT NULL
+    op.alter_column('prompts', 'title', nullable=False)
     op.drop_column('prompts', 'slug')
     op.drop_column('prompts', 'latest_version_id')
     op.drop_column('prompts', 'created_by')

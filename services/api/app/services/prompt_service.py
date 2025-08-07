@@ -2,9 +2,10 @@
 
 from datetime import datetime
 import uuid
+from uuid import UUID
 from typing import List
 
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, Query
 
 from app.models.prompt import (
     Prompt,
@@ -31,7 +32,7 @@ def create_prompt(db: Session, prompt: PromptCreate) -> Prompt:
         Prompt: Serialized prompt version including header fields.
     """
 
-    prompt_header = PromptHeaderORM(
+    prompt_header: PromptHeaderORM = PromptHeaderORM(
         id=uuid.uuid4(),
         title=prompt.title,
         tags=prompt.tags or None,
@@ -42,7 +43,7 @@ def create_prompt(db: Session, prompt: PromptCreate) -> Prompt:
     db.commit()
     db.refresh(prompt_header)
 
-    version_orm = PromptVersionORM(
+    version_orm: PromptVersionORM = PromptVersionORM(
         id=uuid.uuid4(),
         prompt_id=prompt_header.id,
         version="1",
@@ -109,7 +110,7 @@ def list_prompts(
 ) -> List[Prompt]:
     """List prompts applying optional filters."""
 
-    query = db.query(PromptVersionORM).join(PromptHeaderORM)
+    query: Query[PromptVersionORM] = db.query(PromptVersionORM).join(PromptHeaderORM)
 
     if model:
         query = query.filter(PromptVersionORM.target_models.any(model))
@@ -119,8 +120,12 @@ def list_prompts(
         query = query.filter(PromptVersionORM.use_cases.any(use_case))
 
     results: List[Prompt] = []
-    for orm_obj in query.order_by(PromptVersionORM.created_at.desc()).all():
-        header = db.query(PromptHeaderORM).get(orm_obj.prompt_id)
+    orm_objs: List[PromptVersionORM] = query.order_by(PromptVersionORM.created_at.desc()).all()
+    prompt_ids = [obj.prompt_id for obj in orm_objs]
+    headers: List[PromptHeaderORM] = db.query(PromptHeaderORM).filter(PromptHeaderORM.id.in_(prompt_ids)).all()
+    header_map = {header.id: header for header in headers}
+    for orm_obj in orm_objs:
+        header: PromptHeaderORM | None = header_map.get(orm_obj.prompt_id)
         results.append(
             Prompt(
                 id=orm_obj.id,
@@ -157,7 +162,7 @@ def list_prompts(
 def update_prompt(db: Session, prompt_id: uuid.UUID, prompt_update: PromptCreate):
     """Update the latest version of a prompt."""
 
-    latest_version = (
+    latest_version: PromptVersionORM | None = (
         db.query(PromptVersionORM)
         .filter(PromptVersionORM.prompt_id == prompt_id)
         .order_by(PromptVersionORM.version.desc())
@@ -168,8 +173,29 @@ def update_prompt(db: Session, prompt_id: uuid.UUID, prompt_update: PromptCreate
         return None
 
     update_data = prompt_update.model_dump(exclude_unset=True)
+    # Whitelist of allowed fields to update on PromptVersionORM
+    allowed_fields = {
+        "body",
+        "use_cases",
+        "access_control",
+        "target_models",
+        "providers",
+        "integrations",
+        "category",
+        "complexity",
+        "audience",
+        "status",
+        "input_schema",
+        "output_format",
+        "llm_parameters",
+        "success_metrics",
+        "sample_input",
+        "sample_output",
+        "related_prompt_ids",
+        "link",
+    }
     for key, value in update_data.items():
-        if hasattr(latest_version, key):
+        if key in allowed_fields:
             setattr(latest_version, key, value)
 
     latest_version.updated_at = datetime.utcnow()
