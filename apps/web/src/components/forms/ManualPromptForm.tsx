@@ -142,11 +142,31 @@ const ManualPromptForm = ({ onClose }: ManualPromptFormProps) => {
             <label htmlFor="body" className="block text-sm font-medium text-gray-700">
               Prompt Text
             </label>
-            <textarea
-              id="body"
-              {...register('body')}
-              className="block w-full mt-1 text-black border-gray-300 rounded-md shadow-md"
+            <select
+              className="mt-1 mb-2 text-black border-gray-300 rounded-md"
+              value={language}
+              onChange={(e) => {
+                const lang = e.target.value as Language;
+                setLanguage(lang);
+                setValue('output_format', lang);
+              }}
+            >
+              {LANGUAGE_OPTIONS.map((opt) => (
+                <option key={opt} value={opt}>{opt}</option>
+              ))}
+            </select>
+            <Controller
+              name="body"
+              control={control}
+              render={({ field }) => (
+                <CodeEditor
+                  value={field.value}
+                  language={language}
+                  onChange={field.onChange}
+                />
+              )}
             />
+            <input type="hidden" {...register('output_format')} />
             {typeof errors.body?.message === 'string' && <p className="text-red-500">{errors.body.message}</p>}
           </div>
           <div>
@@ -298,124 +318,6 @@ const ManualPromptForm = ({ onClose }: ManualPromptFormProps) => {
         </div>
       )}
 
-      {/* Title and Body are unchanged */}
-      <div>
-        <label htmlFor="title" className="block text-sm font-medium text-gray-700">
-          Title
-        </label>
-        <input
-          id="title"
-          {...register('title')}
-          className="block w-full mt-1 text-black border-gray-300 rounded-md shadow-md"
-        />
-        {errors.title && <p className="text-red-500">{errors.title.message}</p>}
-      </div>
-      <div>
-        <label htmlFor="body" className="block text-sm font-medium text-gray-700">
-          Prompt Text
-        </label>
-        <select
-          className="mt-1 mb-2 text-black border-gray-300 rounded-md"
-          value={language}
-          onChange={(e) => {
-            const lang = e.target.value as Language;
-            setLanguage(lang);
-            setValue('output_format', lang);
-          }}
-        >
-          {LANGUAGE_OPTIONS.map((opt) => (
-            <option key={opt} value={opt}>{opt}</option>
-          ))}
-        </select>
-        <Controller
-          name="body"
-          control={control}
-          render={({ field }) => (
-            <CodeEditor
-              value={field.value}
-              language={language}
-              onChange={field.onChange}
-            />
-          )}
-        />
-        <input type="hidden" {...register('output_format')} />
-        {errors.body && <p className="text-red-500">{errors.body.message}</p>}
-      </div>
-
-      {/* Target Models */}
-      <div>
-        <label htmlFor="target_models" className="block text-sm font-medium text-gray-700">
-          Target Models
-        </label>
-        <Controller
-          name="target_models"
-          control={control}
-          render={({ field }) => (
-            <CreatableMultiSelect
-              isLoading={lookups.loading}
-              options={lookups.target_models}
-              value={lookups.target_models.filter(o => field.value?.includes(o.value))}
-              onChange={(options) => field.onChange(options.map(o => o.value))}
-              onCreateOption={handleCreateOption('target_models')}
-              placeholder="Select or create models..."
-            />
-          )}
-        />
-        {errors.target_models && <p className="text-red-500">{errors.target_models.message}</p>}
-      </div>
-
-      {/* Use Cases */}
-      <div>
-        <label htmlFor="use_cases" className="block text-sm font-medium text-gray-700">Use Cases</label>
-        <Controller name="use_cases" control={control} render={({ field }) => (
-            <CreatableMultiSelect isLoading={lookups.loading} options={lookups.use_cases} value={lookups.use_cases.filter(o => field.value?.includes(o.value))} onChange={(options) => field.onChange(options.map(o => o.value))} onCreateOption={handleCreateOption('use_cases')} />
-        )} />
-        {errors.use_cases && <p className="text-red-500">{errors.use_cases.message}</p>}
-      </div>
-
-      {/* Providers */}
-      <div>
-        <label htmlFor="providers" className="block text-sm font-medium text-gray-700">Providers</label>
-        <Controller name="providers" control={control} render={({ field }) => (
-            <CreatableMultiSelect isLoading={lookups.loading} options={lookups.providers} value={lookups.providers.filter(o => field.value?.includes(o.value))} onChange={(options) => field.onChange(options.map(o => o.value))} onCreateOption={handleCreateOption('providers')} />
-        )} />
-        {errors.providers && <p className="text-red-500">{errors.providers.message}</p>}
-      </div>
-
-      {/* Integrations */}
-      <div>
-        <label htmlFor="integrations" className="block text-sm font-medium text-gray-700">Integrations</label>
-        <Controller name="integrations" control={control} render={({ field }) => (
-            <CreatableMultiSelect isLoading={lookups.loading} options={lookups.integrations} value={lookups.integrations.filter(o => field.value?.includes(o.value))} onChange={(options) => field.onChange(options.map(o => o.value))} onCreateOption={handleCreateOption('integrations')} />
-        )} />
-        {errors.integrations && <p className="text-red-500">{errors.integrations.message}</p>}
-      </div>
-
-      {/* Tags */}
-      <div>
-        <label htmlFor="tags" className="block text-sm font-medium text-gray-700">Tags</label>
-        <Controller name="tags" control={control} render={({ field }) => (
-            <TagInput tags={field.value?.map(t => ({id: t, text: t, className: ''})) || []} setTags={(newTags) => field.onChange(newTags.map(t => t.text))} placeholder="Add tags..." />
-        )} />
-        {errors.tags && <p className="text-red-500">{errors.tags.message}</p>}
-      </div>
-
-      <div>
-        <label htmlFor="access_control" className="block text-sm font-medium text-gray-700">
-          Access Control
-        </label>
-        <select
-          id="access_control"
-          {...register('access_control')}
-          className="block w-full mt-1 text-black border-gray-300 rounded-md shadow-md"
-        >
-          <option value="public">Public</option>
-          <option value="private">Private</option>
-          <option value="team-only">Team Only</option>
-          <option value="role-based">Role Based</option>
-        </select>
-        {errors.access_control && <p className="text-red-500">{errors.access_control.message}</p>}
-      </div>
       {/* Add other form fields here */}
       <div className="flex justify-end mt-6">
         <button
