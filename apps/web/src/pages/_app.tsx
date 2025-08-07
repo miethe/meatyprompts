@@ -5,17 +5,20 @@ import Layout from '@/components/Layout'
 import { PromptProvider } from '@/contexts/PromptContext'
 import { LookupProvider } from '@/contexts/LookupContext'
 import { FieldHelpProvider } from '@/contexts/FieldHelpContext'
+import { ThemeProvider } from '@/theme'
 
 export default function App({ Component, pageProps }: AppProps) {
   return (
-    <PromptProvider>
-      <LookupProvider>
-        <FieldHelpProvider>
-          <Layout>
-            <Component {...pageProps} />
-          </Layout>
-        </FieldHelpProvider>
-      </LookupProvider>
-    </PromptProvider>
+    <ThemeProvider>
+      <PromptProvider>
+        <LookupProvider>
+          <FieldHelpProvider>
+            <Layout>
+              <Component {...pageProps} />
+            </Layout>
+          </FieldHelpProvider>
+        </LookupProvider>
+      </PromptProvider>
+    </ThemeProvider>
   )
 }
