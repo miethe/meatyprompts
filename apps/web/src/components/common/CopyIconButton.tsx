@@ -22,7 +22,7 @@ const CopyIconButton: React.FC<CopyIconButtonProps> = ({ text }) => {
   };
 
   return (
-    <button aria-label={t('copy.success')} onClick={handleCopy} className="ml-2 text-gray-400 hover:text-gray-200">
+    <button aria-label={t('copy.buttonLabel')} onClick={handleCopy} className="ml-2 text-gray-400 hover:text-gray-200">
       <Copy className="w-4 h-4" />
       <span
         className="sr-only"
