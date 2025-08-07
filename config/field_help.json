@@ -1,0 +1,5 @@
+{
+  "target_models": "List of language models the prompt targets.",
+  "providers": "Model providers associated with the prompt.",
+  "integrations": "External tools or services the prompt integrates with."
+}

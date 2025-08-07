@@ -7,6 +7,7 @@ import { usePrompt } from '@/contexts/PromptContext';
 import CreatableMultiSelect from '../form/CreatableMultiSelect';
 import TagInput from '../form/TagInput';
 import { useLookups } from '@/contexts/LookupContext';
+import { useFieldHelp } from '@/contexts/FieldHelpContext';
 
 const schema = z.object({
   title: z.string().min(1, 'Title is required'),
@@ -22,6 +23,7 @@ const schema = z.object({
 const ManualPromptForm = ({ onClose }) => {
   const { createPrompt } = usePrompt();
   const { lookups, addLookup } = useLookups();
+  const { help } = useFieldHelp();
 
 
   const {
@@ -84,7 +86,7 @@ const ManualPromptForm = ({ onClose }) => {
       {/* Target Models */}
       <div>
         <label htmlFor="target_models" className="block text-sm font-medium text-gray-700">
-          Target Models
+          Target Models{help.target_models && (<span className="ml-1 text-gray-400 cursor-help" title={help.target_models}>ⓘ</span>)}
         </label>
         <Controller
           name="target_models"
@@ -114,7 +116,7 @@ const ManualPromptForm = ({ onClose }) => {
 
       {/* Providers */}
       <div>
-        <label htmlFor="providers" className="block text-sm font-medium text-gray-700">Providers</label>
+        <label htmlFor="providers" className="block text-sm font-medium text-gray-700">Providers{help.providers && (<span className="ml-1 text-gray-400 cursor-help" title={help.providers}>ⓘ</span>)}</label>
         <Controller name="providers" control={control} render={({ field }) => (
             <CreatableMultiSelect isLoading={lookups.loading} options={lookups.providers} value={lookups.providers.filter(o => field.value?.includes(o.value))} onChange={(options) => field.onChange(options.map(o => o.value))} onCreateOption={handleCreateOption('providers')} />
         )} />
@@ -123,7 +125,7 @@ const ManualPromptForm = ({ onClose }) => {
 
       {/* Integrations */}
       <div>
-        <label htmlFor="integrations" className="block text-sm font-medium text-gray-700">Integrations</label>
+        <label htmlFor="integrations" className="block text-sm font-medium text-gray-700">Integrations{help.integrations && (<span className="ml-1 text-gray-400 cursor-help" title={help.integrations}>ⓘ</span>)}</label>
         <Controller name="integrations" control={control} render={({ field }) => (
             <CreatableMultiSelect isLoading={lookups.loading} options={lookups.integrations} value={lookups.integrations.filter(o => field.value?.includes(o.value))} onChange={(options) => field.onChange(options.map(o => o.value))} onCreateOption={handleCreateOption('integrations')} />
         )} />

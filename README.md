@@ -47,6 +47,10 @@ discovery and reuse.  Each prompt captures:
 Timestamps for creation and last modification are managed by the
 database.  See the OpenAPI docs for the full schema.
 
+## Field Help
+
+Tooltip text for form fields such as target models, providers, and integrations is configured in `config/field_help.json` and available from the `/api/v1/metadata/fields` endpoint.
+
 ## License
 
 This template is provided under the terms of the [MIT License](LICENSE).  See the `LICENSE` file for details.
