@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
+import { useTranslation } from 'react-i18next';
 
 const Sidebar = () => {
   const [isCollapsed, setIsCollapsed] = useState(false);
+  const { t } = useTranslation();
 
   return (
     <div className={`flex flex-col bg-gray-800 ${isCollapsed ? 'w-20' : 'w-64'} transition-all duration-300`}>
@@ -15,13 +17,13 @@ const Sidebar = () => {
             <li>
               <Link href="/dashboard" className="flex items-center h-10 px-3 text-gray-300 rounded hover:bg-gray-700">
                 <span className="mr-2">📊</span>
-                {!isCollapsed && 'Dashboard'}
+                {!isCollapsed && t('sidebar.dashboard', 'Dashboard')}
               </Link>
             </li>
             <li>
               <Link href="/prompts" className="flex items-center h-10 px-3 text-gray-300 rounded hover:bg-gray-700">
                 <span className="mr-2">💡</span>
-                {!isCollapsed && 'Prompts'}
+                {!isCollapsed && t('sidebar.prompts', 'Prompts')}
               </Link>
             </li>
           </ul>
