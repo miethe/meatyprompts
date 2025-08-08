@@ -194,7 +194,7 @@ const PromptDetailModal: React.FC<PromptDetailModalProps> = ({ prompt, isOpen, o
           ) : (
             <>
               <Button variant="outline" onClick={onClose}>Close</Button>
-              <Button onClick={() => setIsEditing(true)}>Edit</Button>
+              <Button variant="outline" onClick={() => setIsEditing(true)}>Edit</Button>
             </>
           )}
         </DialogFooter>
