@@ -5,13 +5,13 @@
 
 ---
 
-### 1 · Narrative
+## 1 · Narrative
 
 *As a* **user**, *I want* to **POST, GET (list + by id), and PUT** prompts with required metadata and system timestamps, *so that* the Vault UI can persist and retrieve my prompts quickly and consistently with the PRD’s Phase-1 scope (search and other actions come later). The API must align with the schema and acceptance criteria defined in the PRD for Phase 1 (Create/Edit; Tags/Models) and the private route layout for `/prompts`. &#x20;
 
 ---
 
-### 2 · Acceptance Criteria
+## 2 · Acceptance Criteria
 
 | # | Behaviour                                                                                    | Measure / Test                                                                                       |
 | - | -------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------- |
@@ -26,7 +26,7 @@
 
 ---
 
-### 3 · Context & Dependencies
+## 3 · Context & Dependencies
 
 * **Depends on**
 
@@ -39,9 +39,9 @@
 
 ---
 
-### 4 · Architecture & Implementation Details
+## 4 · Architecture & Implementation Details
 
-#### 4.1 Database & Schema
+### 4.1 Database & Schema
 
 * **Tables (exist):**
 
@@ -50,7 +50,7 @@
 * **Indexes:** ensure index on `prompt_versions.created_at` for default sort; join queries rely on FK `prompt_id`. *(Add Alembic migration if missing.)*
 * **Model contracts:** Pydantic `Prompt` uses `from_attributes=True` and **must** include header fields (`title`, `tags`) in responses.&#x20;
 
-#### 4.2 API Endpoints
+### 4.2 API Endpoints
 
 * **File:** `backend/api/routes/prompts.py`
 
@@ -62,7 +62,7 @@
 
 **Contract (per PRD, Phase-1 private API):** `/prompts` resources are in scope now; other actions (duplicate, favorite, archive) follow later.&#x20;
 
-#### 4.3 Backend Services & Tasks
+### 4.3 Backend Services & Tasks
 
 * **File:** `app/services/prompt_service.py`
 
@@ -70,18 +70,18 @@
   * **Fix** `update_prompt(...)` to return hydrated `Prompt` (align with create/list). *(Currently returns `PromptVersionORM` only.)*&#x20;
   * **List** already joins header + versions and maps to `Prompt`. Reuse mapping helper. &#x20;
 
-#### 4.4 Frontend (Wire-up only)
+### 4.4 Frontend (Wire-up only)
 
 * Data hooks call the above endpoints for Vault screens (no UI scope here). PRD expects CRUD in Sprint 1 to unblock UI.&#x20;
 
-#### 4.5 Observability & Logging
+### 4.5 Observability & Logging
 
 * Add spans: `prompts.create`, `prompts.list`, `prompts.get`, `prompts.update`; include `user_id`, `prompt_id`.
 * Structured error logs for 4xx/5xx.
 
 ---
 
-### 5 · Testing Strategy
+## 5 · Testing Strategy
 
 | Layer           | Tool                    | New Tests / Assertions                                                                |
 | --------------- | ----------------------- | ------------------------------------------------------------------------------------- |
@@ -93,7 +93,7 @@
 
 ---
 
-### 6 · Documentation & Artifacts
+## 6 · Documentation & Artifacts
 
 | File / Location              | Update / Create                                 |
 | ---------------------------- | ----------------------------------------------- |
@@ -104,7 +104,7 @@
 
 ---
 
-### 7 · Risks & Mitigations
+## 7 · Risks & Mitigations
 
 | Risk                                         | Impact                                  | Mitigation                                                                           |
 | -------------------------------------------- | --------------------------------------- | ------------------------------------------------------------------------------------ |
@@ -114,14 +114,14 @@
 
 ---
 
-### 8 · Future Considerations & Placeholders
+## 8 · Future Considerations & Placeholders
 
 * Expand list filters to `query`, `tags`, `favorite`, `archived`; add trigram/FTS and perf budget per PRD. &#x20;
 * Add `POST /prompts/{id}/duplicate`, `favorite`, `archive` in their dedicated stories.&#x20;
 
 ---
 
-### 9 · Implementation Tasks (Dev-Ready)
+## 9 · Implementation Tasks (Dev-Ready)
 
 * **API**
 
@@ -139,7 +139,7 @@
 
 ---
 
-### 10 · Gaps / Clarifications (TBD)
+## 10 · Gaps / Clarifications (TBD)
 
 * **`detailed-impl.md`** was not attached/found; if it specifies pagination, sorting enums, or error codes beyond the above, please share.
 * Confirm **DELETE** policy in Phase 1 (hard delete vs. wait for “Archive” in S2). PRD timeline implies archive/favorites in S2; propose **no DELETE** now.&#x20;
