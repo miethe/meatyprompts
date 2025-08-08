@@ -13,13 +13,23 @@ from datetime import datetime
 from typing import Any, Dict, List, Optional
 from uuid import UUID
 
+from enum import Enum as PyEnum
+
 from pydantic import BaseModel, Field
-from sqlalchemy import ARRAY, Column, ForeignKey, Index, String, TIMESTAMP
-from sqlalchemy.dialects.postgresql import JSONB, UUID as SA_UUID
+from sqlalchemy import ARRAY, Boolean, Column, ForeignKey, Index, Integer, String, TIMESTAMP, text
+from sqlalchemy.dialects.postgresql import JSONB, UUID as SA_UUID, ENUM
 from sqlalchemy.orm import declarative_base
 from sqlalchemy.sql import func
+from pgvector.sqlalchemy import Vector
 
 Base = declarative_base()
+
+
+class PromptAccessControl(str, PyEnum):
+    """Enumeration for prompt access policies."""
+
+    PRIVATE = "private"
+    UNLISTED = "unlisted"
 
 
 class PromptBase(BaseModel):
@@ -28,7 +38,9 @@ class PromptBase(BaseModel):
     title: str = Field(..., description="Human readable name for the prompt")
     body: str = Field(..., description="Prompt text to be sent to the model")
     use_cases: List[str] = Field(..., description="List of applicable use cases")
-    access_control: str = Field(..., description="Access policy for the prompt")
+    access_control: PromptAccessControl = Field(
+        ..., description="Access policy for the prompt"
+    )
     target_models: Optional[List[str]] = Field(default=None, description="LLM models this prompt targets")
     providers: Optional[List[str]] = Field(default=None, description="Model providers")
     integrations: Optional[List[str]] = Field(default=None, description="Tooling integrations")
@@ -56,7 +68,12 @@ class Prompt(PromptBase):
 
     id: UUID
     prompt_id: UUID
-    version: str
+    owner_id: UUID
+    version: int
+    is_favorite: bool = False
+    is_archived: bool = False
+    block_count: int = 0
+    icon_url: Optional[str] = None
     created_at: datetime
     updated_at: datetime
 
@@ -69,10 +86,17 @@ class PromptHeaderORM(Base):
     """ORM model for the prompts table containing prompt level fields."""
 
     __tablename__ = "prompts"
+    __table_args__ = (Index("ix_prompts_owner_updated", "owner_id", "updated_at"),)
 
     id = Column(SA_UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    owner_id = Column(SA_UUID(as_uuid=True), ForeignKey("users.id"), nullable=False)
     title = Column(String, nullable=False)
     tags = Column(ARRAY(String), nullable=True)
+    is_favorite = Column(Boolean, nullable=False, server_default="false")
+    is_archived = Column(Boolean, nullable=False, server_default="false")
+    block_count = Column(Integer, nullable=False, server_default="0")
+    embedding = Column(Vector(1536), nullable=True)
+    icon_url = Column(String, nullable=True)
     created_at = Column(TIMESTAMP(timezone=True), server_default=func.now(), nullable=False)
     updated_at = Column(
         TIMESTAMP(timezone=True),
@@ -86,14 +110,19 @@ class PromptVersionORM(Base):
     """ORM model for individual versions of a prompt."""
 
     __tablename__ = "prompt_versions"
-    __table_args__ = (Index("ix_prompt_versions_created_at", "created_at"),)
+    __table_args__ = (
+        Index("ix_prompt_versions_created_at", "created_at"),
+        Index("ix_prompt_versions_prompt_desc", "prompt_id", text("version DESC")),
+    )
 
     id = Column(SA_UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     prompt_id = Column(SA_UUID(as_uuid=True), ForeignKey("prompts.id"), nullable=False)
-    version = Column(String, nullable=False)
+    version = Column(Integer, nullable=False)
     body = Column(String, nullable=False)
     description = Column(String, nullable=True)
-    access_control = Column(String, nullable=False)
+    access_control = Column(
+        ENUM(PromptAccessControl, name="prompt_access_control"), nullable=False
+    )
     target_models = Column(ARRAY(String), nullable=True)
     providers = Column(ARRAY(String), nullable=True)
     integrations = Column(ARRAY(String), nullable=True)
@@ -117,4 +146,3 @@ class PromptVersionORM(Base):
         onupdate=func.now(),
         nullable=False,
     )
-
