@@ -2,6 +2,10 @@
 
 This document describes the API for MeatyPrompts.
 
+## Authentication
+
+See [Authentication API](api/auth.md) for details on login, `/me`, and logout.
+
 ## Prompts
 
 ### GET /api/v1/prompts

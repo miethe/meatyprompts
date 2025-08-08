@@ -1,6 +1,4 @@
-import axios from 'axios';
-
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+import { apiRequest } from './api_client';
 
 type LookupType = 'target_models' | 'providers' | 'integrations' | 'use_cases';
 
@@ -19,8 +17,10 @@ const lookupTypeMap: Record<LookupType, string> = {
 export const getLookups = async (type: LookupType): Promise<Lookup[]> => {
   try {
     const backendType = lookupTypeMap[type] || type;
-    const response = await axios.get(`${API_BASE_URL}/api/v1/lookups/${backendType}`);
-    return response.data;
+    return await apiRequest<Lookup[]>({
+      endpoint: `/api/v1/lookups/${backendType}`,
+      method: 'GET',
+    });
   } catch (error) {
     console.error(`Failed to fetch ${type}:`, error);
     return [];
@@ -30,8 +30,11 @@ export const getLookups = async (type: LookupType): Promise<Lookup[]> => {
 export const createLookup = async (type: LookupType, value: string): Promise<Lookup | null> => {
   try {
     const backendType = lookupTypeMap[type] || type;
-    const response = await axios.post(`${API_BASE_URL}/api/v1/lookups/${backendType}`, { value });
-    return response.data;
+    return await apiRequest<Lookup>({
+      endpoint: `/api/v1/lookups/${backendType}`,
+      method: 'POST',
+      body: { value },
+    });
   } catch (error) {
     console.error(`Failed to create ${type}:`, error);
     return null;
