@@ -6,15 +6,19 @@ This document describes the API for MeatyPrompts.
 
 ### GET /api/v1/prompts
 
-Returns a list of prompts. Supports filtering by `model`, `tool`, and `purpose`.
+Returns a list of prompts. Supports filtering by `model`, `provider`, and `use_case`.
 
 **Query Parameters:**
 
 *   `model` (string, optional): Filter by a specific model.
-*   `tool` (string, optional): Filter by a specific tool.
-*   `purpose` (string, optional): Filter by a specific purpose.
+*   `provider` (string, optional): Filter by a specific provider.
+*   `use_case` (string, optional): Filter by a specific use case.
 
-**Example:** `/api/v1/prompts?model=gpt-4&tool=python`
+**Example:** `/api/v1/prompts?model=gpt-4o`
+
+### GET /api/v1/prompts/{id}
+
+Fetch the latest version of a prompt by its identifier. Returns `404` if not found.
 
 ### POST /api/v1/prompts
 
@@ -25,31 +29,24 @@ Creates a new prompt.
 ```json
 {
   "title": "My New Prompt",
-  "purpose": ["To do something cool"],
-  "models": ["gpt-4"],
-  "tools": ["python"],
-  "platforms": ["web"],
-  "tags": ["testing"],
   "body": "This is the prompt text.",
-  "visibility": "private"
+  "use_cases": ["testing"],
+  "access_control": "private",
+  "tags": ["example"]
 }
 ```
 
 **Response:** (201 Created)
 
-Returns the created prompt version object.
+Returns the created prompt including header fields.
 
 ### PUT /api/v1/prompts/{prompt_id}
 
-Updates the latest version of a prompt.
-
-**Request Body:**
-
-Same as the `POST` request body with optional `sample_input` and `sample_output` fields.
+Updates the latest version of a prompt without creating a new version.
 
 **Response:**
 
-Returns the updated prompt version object.
+Returns the updated prompt including header fields.
 
 ## Lookups
 

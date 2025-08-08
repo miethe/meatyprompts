@@ -14,7 +14,7 @@ from typing import Any, Dict, List, Optional
 from uuid import UUID
 
 from pydantic import BaseModel, Field
-from sqlalchemy import ARRAY, Column, ForeignKey, String, TIMESTAMP
+from sqlalchemy import ARRAY, Column, ForeignKey, Index, String, TIMESTAMP
 from sqlalchemy.dialects.postgresql import JSONB, UUID as SA_UUID
 from sqlalchemy.orm import declarative_base
 from sqlalchemy.sql import func
@@ -80,10 +80,13 @@ class PromptHeaderORM(Base):
         onupdate=func.now(),
         nullable=False,
     )
+
+
 class PromptVersionORM(Base):
     """ORM model for individual versions of a prompt."""
 
     __tablename__ = "prompt_versions"
+    __table_args__ = (Index("ix_prompt_versions_created_at", "created_at"),)
 
     id = Column(SA_UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     prompt_id = Column(SA_UUID(as_uuid=True), ForeignKey("prompts.id"), nullable=False)
@@ -114,3 +117,4 @@ class PromptVersionORM(Base):
         onupdate=func.now(),
         nullable=False,
     )
+
