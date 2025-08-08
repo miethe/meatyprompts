@@ -1,6 +1,4 @@
-import axios from 'axios';
-
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+import { apiRequest } from './api_client';
 
 export interface FieldHelp {
   target_models: string;
@@ -9,6 +7,8 @@ export interface FieldHelp {
 }
 
 export const getFieldHelp = async (): Promise<FieldHelp> => {
-  const response = await axios.get(`${API_BASE_URL}/api/v1/metadata/fields`);
-  return response.data;
+  return apiRequest<FieldHelp>({
+    endpoint: '/api/v1/metadata/fields',
+    method: 'GET',
+  });
 };
