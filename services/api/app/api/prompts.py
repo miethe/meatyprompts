@@ -8,13 +8,19 @@ from sqlalchemy.orm import Session
 from app.db.session import get_db
 from app.models.prompt import Prompt, PromptCreate
 from app.services import prompt_service
+from app.api.deps import get_current_user, csrf_protect
 
 logger = logging.getLogger(__name__)
 
-router = APIRouter()
+router = APIRouter(dependencies=[Depends(get_current_user)])
 
 
-@router.post("/prompts", response_model=Prompt, status_code=201)
+@router.post(
+    "/prompts",
+    response_model=Prompt,
+    status_code=201,
+    dependencies=[Depends(csrf_protect)],
+)
 def create_new_prompt(prompt: PromptCreate, db: Session = Depends(get_db)):
     """Create a new prompt."""
 
@@ -53,7 +59,11 @@ def get_prompt(prompt_id: uuid.UUID, db: Session = Depends(get_db)):
     return prompt_obj
 
 
-@router.put("/prompts/{prompt_id}", response_model=Prompt)
+@router.put(
+    "/prompts/{prompt_id}",
+    response_model=Prompt,
+    dependencies=[Depends(csrf_protect)],
+)
 def update_existing_prompt(
     prompt_id: uuid.UUID, prompt: PromptCreate, db: Session = Depends(get_db)
 ):

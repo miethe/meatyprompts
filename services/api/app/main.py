@@ -2,7 +2,7 @@
 from __future__ import annotations
 
 import os
-from fastapi import FastAPI
+from fastapi import Depends, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 
@@ -27,11 +27,20 @@ def create_app() -> FastAPI:
         """Simple health check endpoint."""
         return {"status": "ok"}
 
-    from app.api import prompts
+    from app.api import auth, prompts
     from app.api.endpoints import lookups, metadata
+    app.include_router(auth.router)
     app.include_router(prompts.router, prefix="/api/v1")
     app.include_router(lookups.router, prefix="/api/v1/lookups", tags=["lookups"])
     app.include_router(metadata.router, prefix="/api/v1/metadata", tags=["metadata"])
+
+    from app.api.deps import get_current_user
+    from app.models.user import User
+
+    @app.get("/me", response_model=User, tags=["auth"])
+    async def read_me(user: User = Depends(get_current_user)) -> User:
+        """Return the profile for the current user."""
+        return user
 
     return app
 
