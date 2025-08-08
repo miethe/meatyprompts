@@ -5,13 +5,13 @@
 
 ---
 
-### 1 · Narrative
+## 1 · Narrative
 
 *As a* **user**, *I want* a **Prompts** page that shows my prompts as responsive cards (title, first line of body, tags, version badge, quick copy), with basic filters and a detail modal, *so that* I can find and reuse content fast. Cards and the detail modal should reflect the Phase-1 metadata and UX notes, without over-scoping features reserved for later sprints. &#x20;
 
 ---
 
-### 2 · Acceptance Criteria
+## 2 · Acceptance Criteria
 
 | # | Behaviour                                                                                                  | Measure / Test                                                                                             |
 | - | ---------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
@@ -28,7 +28,7 @@
 
 ---
 
-### 3 · Context & Dependencies
+## 3 · Context & Dependencies
 
 * **Depends on**
 
@@ -41,9 +41,9 @@
 
 ---
 
-### 4 · Architecture & Implementation Details
+## 4 · Architecture & Implementation Details
 
-#### 4.1 Frontend Structure
+### 4.1 Frontend Structure
 
 * **Pages & Containers**
 
@@ -60,19 +60,19 @@
   * **Option A (recommended for now):** use **PromptContext** for local cache and filter application; context delegates to API for list & get.
   * **Option B:** use TanStack Query for `/prompts` with queryKey `[prompts, filters]` and infinite/virtualized list; keep context as façade.
 
-#### 4.2 API Usage (read-only paths for this story)
+### 4.2 API Usage (read-only paths for this story)
 
 * `GET /prompts?model=&tool=&purpose=` — drives the grid.
 * `GET /prompts/{id}` — hydrates the detail modal on open.
   (Contracts provided by **MP-P1-API-003**; ensure consistent shape for `title, body, tags, version, link, sample_input/output`.)&#x20;
 
-#### 4.3 UI/UX Requirements Mapped to PRD
+### 4.3 UI/UX Requirements Mapped to PRD
 
 * **Card content**: title, first line of body, tags, quick copy, version badge (favorite star & model icons deferred).&#x20;
 * **Vault**: responsive grid; sort placeholder (default updated\_at desc) visible but disabled until SRCH story lands.&#x20;
 * **Empty states**: with CTA and brief “starter templates” pointer (if seeded later).&#x20;
 
-#### 4.4 Performance, A11y, Observability
+### 4.4 Performance, A11y, Observability
 
 * **Perf**: virtualize grid (e.g., `react-virtualized`/`@tanstack/virtual`) if list > 250 items on screen; lazy-render tags; debounce filter apply.
 * **A11y**: button roles on copy; keyboard open/close for modal; focus trap & return.
@@ -80,7 +80,7 @@
 
 ---
 
-### 5 · Testing Strategy
+## 5 · Testing Strategy
 
 | Layer           | Tool                | New Tests / Assertions                                                                                                                            |
 | --------------- | ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -91,7 +91,7 @@
 
 ---
 
-### 6 · Documentation & Artifacts
+## 6 · Documentation & Artifacts
 
 * **Storybook** entries for `PromptCard`, `PromptDetailModal`, `PromptListFilters` with knobs for different densities (few/many tags, long titles).
 * **docs/ui/vault.md** — screenshots of grid breakpoints; a11y notes; copy behavior; empty states.
@@ -99,7 +99,7 @@
 
 ---
 
-### 7 · Risks & Mitigations
+## 7 · Risks & Mitigations
 
 | Risk                                              | Impact              | Mitigation                                                  |
 | ------------------------------------------------- | ------------------- | ----------------------------------------------------------- |
@@ -109,7 +109,7 @@
 
 ---
 
-### 8 · Open Questions (TBD)
+## 8 · Open Questions (TBD)
 
 * **Icons for target models** on the card — do we include in P1 or defer to Sprint 2? (PRD mentions icons on cards.)&#x20;
 * **Starter templates** on empty state — do we seed now or later?&#x20;
@@ -117,7 +117,7 @@
 
 ---
 
-### 9 · Definition of Done (DoD)
+## 9 · Definition of Done (DoD)
 
 * All ACs met; Storybook updated; a11y & perf checks pass; code reviewed and merged; docs/screenshots attached; light telemetry hooks gated behind feature flags (no-op until TEL story).&#x20;
 
