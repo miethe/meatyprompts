@@ -6,10 +6,12 @@ import os
 import requests
 from fastapi import APIRouter, Depends, HTTPException, Request
 from fastapi.responses import JSONResponse, RedirectResponse
+from sqlalchemy.orm import Session
 
 from app.api.deps import get_current_user
 from app.core.config import settings
-from app.models.user import User
+from app.core.database import get_db
+from app.models.user import AuthProvider, UserORM, User
 from app.services import auth_service
 
 logger = logging.getLogger(__name__)
@@ -30,7 +32,7 @@ def github_login() -> RedirectResponse:
 
 
 @router.get("/auth/github/callback")
-def github_callback(request: Request) -> RedirectResponse:
+def github_callback(request: Request, db: Session = Depends(get_db)) -> RedirectResponse:
     """Handle GitHub OAuth callback, exchange code for token, fetch user info, and issue session."""
     code = request.query_params.get("code")
     if not code:
@@ -80,9 +82,13 @@ def github_callback(request: Request) -> RedirectResponse:
         raise HTTPException(status_code=400, detail="Could not determine GitHub user email")
 
     user = auth_service.get_or_create_user(
+        db,
         email=email,
         name=user_data.get("name") or user_data.get("login"),
         avatar_url=user_data.get("avatar_url"),
+        provider=AuthProvider.github,
+        provider_user_id=str(user_data["id"]),
+        access_token_encrypted=access_token,
     )
     session_token = auth_service.create_session(user.id)
     csrf_token = auth_service.generate_csrf_token()
@@ -126,11 +132,18 @@ def magic_link_request() -> None:
 
 
 @router.get("/auth/magic-link/verify")
-def magic_link_verify(token: str) -> RedirectResponse:
+def magic_link_verify(token: str, db: Session = Depends(get_db)) -> RedirectResponse:
     """Verify a magic link token (disabled by feature flag)."""
     if not settings.FF_AUTH_MAGIC_LINK:
         raise HTTPException(status_code=404, detail="Magic link disabled")
-    user = auth_service.get_or_create_user(email="ml@example.com")
+    user = auth_service.get_or_create_user(
+        db,
+        email="ml@example.com",
+        name=None,
+        avatar_url=None,
+        provider=AuthProvider.magic,
+        provider_user_id="magic-link-token",
+    )
     session_token = auth_service.create_session(user.id)
     response = RedirectResponse(url="/")
     response.set_cookie(

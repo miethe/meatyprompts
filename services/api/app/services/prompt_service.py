@@ -32,6 +32,7 @@ def _to_prompt(version: PromptVersionORM, header: PromptHeaderORM) -> Prompt:
     return Prompt(
         id=version.id,
         prompt_id=version.prompt_id,
+        owner_id=header.owner_id,
         version=version.version,
         title=header.title,
         body=version.body,
@@ -58,11 +59,12 @@ def _to_prompt(version: PromptVersionORM, header: PromptHeaderORM) -> Prompt:
     )
 
 
-def create_prompt(db: Session, prompt: PromptCreate) -> Prompt:
+def create_prompt(db: Session, prompt: PromptCreate, owner_id: UUID) -> Prompt:
     """Create a new prompt and its initial version."""
 
     prompt_header = PromptHeaderORM(
         id=uuid.uuid4(),
+        owner_id=owner_id,
         title=prompt.title,
         tags=prompt.tags or None,
         created_at=datetime.utcnow(),
@@ -78,7 +80,7 @@ def create_prompt(db: Session, prompt: PromptCreate) -> Prompt:
         version="1",
         body=prompt.body,
         description=None,
-        access_control=prompt.access_control,
+        access_control=prompt.access_control.lower() if prompt.access_control else None,
         target_models=prompt.target_models or None,
         providers=prompt.providers or None,
         integrations=prompt.integrations or None,
@@ -104,7 +106,7 @@ def create_prompt(db: Session, prompt: PromptCreate) -> Prompt:
 
     logger.info(
         "prompts.create",
-        extra={"prompt_id": str(prompt_header.id), "user_id": "unknown"},
+        extra={"prompt_id": str(prompt_header.id), "user_id": str(owner_id)},
     )
     return _to_prompt(version_orm, prompt_header)
 
@@ -225,4 +227,3 @@ def update_prompt(db: Session, prompt_id: UUID, prompt_update: PromptCreate) -> 
         extra={"prompt_id": str(prompt_id), "user_id": "unknown"},
     )
     return _to_prompt(latest_version, header)
-
