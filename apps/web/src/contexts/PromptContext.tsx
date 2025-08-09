@@ -34,10 +34,19 @@ function promptReducer(state: PromptState, action: PromptAction): PromptState {
   }
 }
 
+function getCookie(name: string): string | undefined {
+  if (typeof document === 'undefined') return undefined;
+  const match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
+  return match ? decodeURIComponent(match[2]) : undefined;
+}
+
 export const PromptProvider: FC<PromptProviderProps> = ({ children }) => {
   const [state, dispatch] = useReducer(promptReducer, { prompts: [] });
 
   useEffect(() => {
+    // Only fetch prompts if session cookie is present
+    const session = getCookie('session') || getCookie('meatyprompts_session');
+    if (!session) return;
     fetchPrompts().then(data => dispatch({ type: 'LOAD', payload: data }));
   }, []);
 

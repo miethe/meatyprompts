@@ -5,17 +5,14 @@ const PUBLIC_PATHS = ['/login', '/_next', '/favicon.ico', '/api', '/public'];
 
 export function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
-  // Allow public paths
-  if (PUBLIC_PATHS.some((path) => pathname.startsWith(path))) {
+  // Only allow public paths, but NOT the root page
+  if (pathname !== '/' && PUBLIC_PATHS.some((path) => pathname.startsWith(path))) {
     return NextResponse.next();
   }
   // Check for session cookie
   const session = req.cookies.get('session') || req.cookies.get('meatyprompts_session');
   if (!session) {
-    const loginUrl = req.nextUrl.clone();
-    loginUrl.pathname = '/login';
-    loginUrl.search = '';
-    return NextResponse.redirect(loginUrl);
+    return NextResponse.redirect(`${req.nextUrl.origin}/login`);
   }
   return NextResponse.next();
 }
