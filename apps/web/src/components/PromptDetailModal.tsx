@@ -28,9 +28,10 @@ interface PromptDetailModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSave: (updatedPrompt: Prompt) => void;
+  onDuplicate?: () => void;
 }
 
-const PromptDetailModal: React.FC<PromptDetailModalProps> = ({ prompt, isOpen, onClose, onSave }) => {
+const PromptDetailModal: React.FC<PromptDetailModalProps> = ({ prompt, isOpen, onClose, onSave, onDuplicate }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [editedPrompt, setEditedPrompt] = useState<Prompt>(prompt);
 
@@ -176,6 +177,9 @@ const PromptDetailModal: React.FC<PromptDetailModalProps> = ({ prompt, isOpen, o
           ) : (
             <>
               <Button variant="outline" onClick={onClose}>Close</Button>
+              {onDuplicate && (
+                <Button variant="outline" aria-label="Duplicate prompt" onClick={onDuplicate}>Duplicate</Button>
+              )}
               <Button variant="outline" onClick={() => setIsEditing(true)}>Edit</Button>
             </>
           )}

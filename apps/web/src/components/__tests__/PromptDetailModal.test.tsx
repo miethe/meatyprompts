@@ -79,4 +79,20 @@ describe('PromptDetailModal', () => {
     fireEvent.click(screen.getByLabelText('Copy to clipboard'));
     expect(writeText).toHaveBeenCalledWith('initial');
   });
+
+  it('renders duplicate button and fires handler', () => {
+    const handleDuplicate = jest.fn();
+    render(
+      <PromptDetailModal
+        prompt={basePrompt}
+        isOpen={true}
+        onClose={() => {}}
+        onSave={() => {}}
+        onDuplicate={handleDuplicate}
+      />
+    );
+    const button = screen.getByLabelText('Duplicate prompt');
+    fireEvent.click(button);
+    expect(handleDuplicate).toHaveBeenCalled();
+  });
 });

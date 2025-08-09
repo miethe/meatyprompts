@@ -63,6 +63,27 @@ Updates the latest version of a prompt without creating a new version.
 
 Returns the updated prompt including header fields.
 
+### POST /api/v1/prompts/{prompt_id}/duplicate
+
+Create a new version of an existing prompt. The version is incremented and the
+prompt title is suffixed with `(vX)` where `X` is the new version number.
+
+**Response:** (201 Created)
+
+```json
+{
+  "prompt_id": "uuid-of-original",
+  "version": "2",
+  "title": "My Prompt (v2)",
+  "body": "This is the prompt text.",
+  "tags": ["example"],
+  "created_at": "2024-06-01T12:00:00Z",
+  "updated_at": "2024-06-01T12:00:00Z"
+}
+```
+
+Returns the newly duplicated prompt.
+
 ## Lookups
 
 ### GET /api/v1/lookups/{type}

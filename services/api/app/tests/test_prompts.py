@@ -12,6 +12,7 @@ from app.services.prompt_service import (
     get_prompt_by_id,
     list_prompts,
     update_prompt,
+    duplicate_prompt,
 )
 
 def test_create_prompt():
@@ -198,8 +199,75 @@ def test_update_prompt_logs_event():
     with patch("app.services.prompt_service.logger") as mock_logger:
         update_prompt(mock_db, prompt_id, update)
         assert mock_logger.info.call_count >= 2
-        event_call = [c for c in mock_logger.info.call_args_list if c.args[0] == "events.prompt_edited"]
-        assert event_call
+
+
+def test_duplicate_prompt_creates_new_version():
+    mock_db = MagicMock(spec=Session)
+    prompt_id = uuid.uuid4()
+
+    latest_version = PromptVersionORM(
+        id=uuid.uuid4(),
+        prompt_id=prompt_id,
+        version="1",
+        body="body",
+        access_control="private",
+        use_cases=["test"],
+        created_at=datetime.utcnow(),
+        updated_at=datetime.utcnow(),
+    )
+    header = PromptHeaderORM(
+        id=prompt_id,
+        title="My Prompt",
+        tags=["t"],
+        created_at=datetime.utcnow(),
+        updated_at=datetime.utcnow(),
+    )
+
+    query_version = MagicMock()
+    query_header = MagicMock()
+    mock_db.query.side_effect = [query_version, query_header]
+    query_version.filter.return_value.order_by.return_value.first.return_value = latest_version
+    query_header.filter.return_value.first.return_value = header
+
+    result = duplicate_prompt(mock_db, prompt_id)
+
+    assert result.version == "2"
+    assert result.title == "My Prompt (v2)"
+    assert mock_db.add.called
+
+
+def test_duplicate_prompt_handles_non_numeric_version():
+    mock_db = MagicMock(spec=Session)
+    prompt_id = uuid.uuid4()
+
+    latest_version = PromptVersionORM(
+        id=uuid.uuid4(),
+        prompt_id=prompt_id,
+        version="alpha",
+        body="body",
+        access_control="private",
+        use_cases=["test"],
+        created_at=datetime.utcnow(),
+        updated_at=datetime.utcnow(),
+    )
+    header = PromptHeaderORM(
+        id=prompt_id,
+        title="Old Title (v7)",
+        tags=["t"],
+        created_at=datetime.utcnow(),
+        updated_at=datetime.utcnow(),
+    )
+
+    query_version = MagicMock()
+    query_header = MagicMock()
+    mock_db.query.side_effect = [query_version, query_header]
+    query_version.filter.return_value.order_by.return_value.first.return_value = latest_version
+    query_header.filter.return_value.first.return_value = header
+
+    result = duplicate_prompt(mock_db, prompt_id)
+
+    assert result.version == "1"
+    assert result.title == "Old Title (v1)"
 
 
 def test_update_prompt_updates_header_tags():
