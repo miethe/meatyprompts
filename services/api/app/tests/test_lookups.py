@@ -40,6 +40,18 @@ async def test_create_lookup_value_existing():
     assert result.value == "existing-model"
     mock_db.add.assert_not_called()
 
+
+@pytest.mark.asyncio
+async def test_create_lookup_value_case_insensitive_existing():
+    mock_db = MagicMock(spec=Session)
+    existing_model = ModelLookupORM(value="Existing-Model")
+    mock_db.query.return_value.filter.return_value.first.return_value = existing_model
+
+    result = await create_lookup_value(mock_db, "models", "existing-model")
+
+    assert result is existing_model
+    mock_db.add.assert_not_called()
+
 def test_get_lookup_table_invalid():
     with pytest.raises(ValueError):
         get_lookup_table("invalid_type")

@@ -6,6 +6,7 @@ from datetime import datetime
 import logging
 import time
 import uuid
+import re
 from typing import List
 from uuid import UUID
 
@@ -25,6 +26,45 @@ def _clean_array(values: List[str] | None) -> List[str]:
     """Remove ``None`` values from arrays returned by SQLAlchemy."""
 
     return [v for v in values or [] if v is not None]
+
+
+_TAG_RE = re.compile(r"^[a-z0-9._-]{1,32}$")
+
+
+def _normalize_tags(tags: List[str] | None) -> List[str] | None:
+    """Normalize, validate, and deduplicate tag values."""
+
+    if not tags:
+        return None
+    cleaned: List[str] = []
+    for tag in tags:
+        norm = tag.strip().lower()
+        if not _TAG_RE.fullmatch(norm):
+            raise ValueError(
+                "Invalid tag: must be 1-32 characters, lowercase letters, digits, dots (.), underscores (_), or hyphens (-) only."
+            )
+        if norm not in cleaned:
+            cleaned.append(norm)
+    if len(cleaned) > 20:
+        raise ValueError("too many tags (maximum 20 allowed)")
+    return cleaned
+
+
+def _normalize_models(models: List[str] | None) -> List[str] | None:
+    """Trim and deduplicate model identifiers with basic validation."""
+
+    if not models:
+        return None
+    cleaned: List[str] = []
+    for model in models:
+        norm = model.strip()
+        if not (1 <= len(norm) <= 64):
+            raise ValueError("invalid target model: must be 1-64 characters")
+        if norm not in cleaned:
+            cleaned.append(norm)
+    if len(cleaned) > 20:
+        raise ValueError("too many target models (maximum 20 allowed)")
+    return cleaned
 
 
 def _to_prompt(version: PromptVersionORM, header: PromptHeaderORM) -> Prompt:
@@ -62,12 +102,14 @@ def _to_prompt(version: PromptVersionORM, header: PromptHeaderORM) -> Prompt:
 
 def create_prompt(db: Session, prompt: PromptCreate, owner_id: UUID) -> Prompt:
     """Create a new prompt and its initial version."""
+    tags = _normalize_tags(prompt.tags)
+    models = _normalize_models(prompt.target_models)
 
     prompt_header = PromptHeaderORM(
         id=uuid.uuid4(),
         owner_id=owner_id,
         title=prompt.title,
-        tags=prompt.tags or None,
+        tags=tags,
         created_at=datetime.utcnow(),
         updated_at=datetime.utcnow(),
     )
@@ -82,7 +124,7 @@ def create_prompt(db: Session, prompt: PromptCreate, owner_id: UUID) -> Prompt:
         body=prompt.body,
         description=None,
         access_control=prompt.access_control.lower() if prompt.access_control else None,
-        target_models=prompt.target_models or None,
+        target_models=models,
         providers=prompt.providers or None,
         integrations=prompt.integrations or None,
         use_cases=prompt.use_cases,
@@ -187,6 +229,14 @@ def update_prompt(db: Session, prompt_id: UUID, prompt_update: PromptCreate) -> 
     if latest_version is None:
         return None
 
+    header = (
+        db.query(PromptHeaderORM)
+        .filter(PromptHeaderORM.id == prompt_id)
+        .first()
+    )
+    if header is None:
+        return None
+
     update_data = prompt_update.model_dump(exclude_unset=True)
     allowed_fields = {
         "body",
@@ -211,19 +261,19 @@ def update_prompt(db: Session, prompt_id: UUID, prompt_update: PromptCreate) -> 
 
     for key, value in update_data.items():
         if key in allowed_fields:
-            setattr(latest_version, key, value)
+            if key == "target_models":
+                setattr(latest_version, key, _normalize_models(value))
+            else:
+                setattr(latest_version, key, value)
+
+    if "tags" in update_data:
+        header.tags = _normalize_tags(update_data["tags"])
 
     latest_version.updated_at = datetime.utcnow()
+    header.updated_at = datetime.utcnow()
     db.commit()
     db.refresh(latest_version)
-
-    header = (
-        db.query(PromptHeaderORM)
-        .filter(PromptHeaderORM.id == prompt_id)
-        .first()
-    )
-    if header is None:
-        return None
+    db.refresh(header)
 
     elapsed_ms = (time.perf_counter() - start) * 1000
     body_bytes = len((latest_version.body or "").encode("utf-8"))
