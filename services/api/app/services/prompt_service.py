@@ -273,7 +273,7 @@ def duplicate_prompt(db: Session, prompt_id: UUID) -> Prompt | None:
     )
     db.add(version_copy)
 
-    base_title = re.sub(r"\s\(v\d+\)$", "", header.title)
+    base_title = re.sub(r"\s\(v[^\)]+\)$", "", header.title)
     header.title = f"{base_title} (v{new_version})"
     header.updated_at = datetime.utcnow()
 

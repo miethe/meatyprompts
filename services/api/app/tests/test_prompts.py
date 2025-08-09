@@ -198,7 +198,12 @@ def test_update_prompt_logs_event():
 
     with patch("app.services.prompt_service.logger") as mock_logger:
         update_prompt(mock_db, prompt_id, update)
-        assert mock_logger.info.call_count >= 2
+        # Check that logger.info was called with a message about updating the prompt
+        found_update_log = any(
+            "Updating prompt" in str(call.args[0]) or "updated prompt" in str(call.args[0])
+            for call in mock_logger.info.call_args_list
+        )
+        assert found_update_log, "Expected an 'Updating prompt' log message"
 
 
 def test_duplicate_prompt_creates_new_version():
