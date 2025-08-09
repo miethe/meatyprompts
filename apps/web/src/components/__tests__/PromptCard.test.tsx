@@ -1,6 +1,24 @@
 import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import PromptCard from '../PromptCard';
+import { copyText } from '../../lib/clipboard';
+import { track } from '../../lib/analytics';
+
+jest.mock('../../lib/clipboard');
+jest.mock('../../lib/analytics');
+jest.mock('react-i18next', () => ({
+  useTranslation: () => ({
+    t: (key: string, opts?: any) => {
+      const translations: Record<string, string> = {
+        'copy.quick': 'Copy body',
+        'copy.menuTitle': 'Copy options',
+        'copy.body': 'Copy body',
+        'toast.copied': `Copied ${opts?.variant}`,
+      };
+      return translations[key] || key;
+    },
+  }),
+}));
 
 describe('PromptCard', () => {
   const prompt = {
@@ -12,6 +30,10 @@ describe('PromptCard', () => {
     models: ['gpt-4'],
     tags: ['tag1', 'tag2'],
   };
+
+  beforeEach(() => {
+    (copyText as jest.Mock).mockResolvedValue(undefined);
+  });
 
   it('renders the prompt title, body, version, and tags', () => {
     render(<PromptCard prompt={prompt} onClick={() => {}} />);
@@ -30,13 +52,12 @@ describe('PromptCard', () => {
     expect(handleClick).toHaveBeenCalledTimes(1);
   });
 
-  it('copies body text when copy icon clicked', () => {
-    const writeText = jest.fn().mockResolvedValue(undefined);
-    Object.assign(navigator, { clipboard: { writeText } });
+  it('copies body text when quick copy clicked', async () => {
     render(<PromptCard prompt={prompt} onClick={() => {}} />);
-    const button = screen.getByLabelText('Copy to clipboard');
+    const button = screen.getByLabelText('Copy body');
     fireEvent.click(button);
-    expect(writeText).toHaveBeenCalledWith('This is the body of the prompt.');
-    expect(screen.getByText('Copied to clipboard')).toBeInTheDocument();
+    await waitFor(() => expect(copyText).toHaveBeenCalledWith('This is the body of the prompt.'));
+    expect(track).toHaveBeenCalledWith('prompt_copied', expect.objectContaining({ variant: 'body', source: 'card' }));
+    expect(screen.getByText('Copied Copy body')).toBeInTheDocument();
   });
 });
