@@ -40,11 +40,13 @@ def _normalize_tags(tags: List[str] | None) -> List[str] | None:
     for tag in tags:
         norm = tag.strip().lower()
         if not _TAG_RE.fullmatch(norm):
-            raise ValueError("invalid tag")
+            raise ValueError(
+                "Invalid tag: must be 1-32 characters, lowercase letters, digits, dots (.), underscores (_), or hyphens (-) only."
+            )
         if norm not in cleaned:
             cleaned.append(norm)
     if len(cleaned) > 20:
-        raise ValueError("too many tags")
+        raise ValueError("too many tags (maximum 20 allowed)")
     return cleaned
 
 
@@ -57,11 +59,11 @@ def _normalize_models(models: List[str] | None) -> List[str] | None:
     for model in models:
         norm = model.strip()
         if not (1 <= len(norm) <= 64):
-            raise ValueError("invalid target model")
+            raise ValueError("invalid target model: must be 1-64 characters")
         if norm not in cleaned:
             cleaned.append(norm)
     if len(cleaned) > 20:
-        raise ValueError("too many target models")
+        raise ValueError("too many target models (maximum 20 allowed)")
     return cleaned
 
 
