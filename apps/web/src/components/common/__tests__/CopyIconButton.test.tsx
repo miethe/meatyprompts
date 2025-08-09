@@ -14,5 +14,6 @@ describe('CopyIconButton', () => {
     render(<CopyIconButton text="copy me" />);
     fireEvent.click(screen.getByRole('button'));
     expect(writeText).toHaveBeenCalledWith('copy me');
+    expect(screen.getByText('Copied to clipboard')).toBeInTheDocument();
   });
 });

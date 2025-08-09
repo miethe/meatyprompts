@@ -3,6 +3,8 @@ import { PromptContext } from '@/contexts/PromptContext';
 import PromptCard from '@/components/PromptCard';
 import PromptListFilters from '@/components/filters/PromptListFilters';
 import PromptDetailModal from '@/components/PromptDetailModal';
+import NewPromptModal from '@/components/modals/NewPromptModal';
+import { Button } from '@/components/ui/button';
 
 // Placeholder for the actual Prompt data type
 interface Prompt {
@@ -19,9 +21,10 @@ interface Prompt {
 
 
 const PromptsPage = () => {
-  const { state, updatePrompt } = useContext(PromptContext);
+  const { state } = useContext(PromptContext);
   const [selectedPrompt, setSelectedPrompt] = useState<Prompt | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isNewPromptOpen, setIsNewPromptOpen] = useState(false);
 
   const handleCardClick = (prompt: Prompt) => {
     setSelectedPrompt(prompt);
@@ -34,10 +37,7 @@ const PromptsPage = () => {
   };
 
   const handleSavePrompt = (updatedPrompt: Prompt) => {
-    // In a real app, you would call an API to save the prompt
-    // For now, we'll just update the context state
-    console.log("Saving prompt:", updatedPrompt);
-    // updatePrompt(updatedPrompt); // Assuming context has an update function
+    console.log('Saving prompt:', updatedPrompt);
     handleCloseModal();
   };
 
@@ -58,7 +58,10 @@ const PromptsPage = () => {
             />
           ))
         ) : (
-          <p>No prompts found.</p>
+          <div className="col-span-full text-center py-10">
+            <p className="mb-4">No prompts found.</p>
+            <Button onClick={() => setIsNewPromptOpen(true)}>New Prompt</Button>
+          </div>
         )}
       </div>
 
@@ -69,6 +72,9 @@ const PromptsPage = () => {
           onClose={handleCloseModal}
           onSave={handleSavePrompt}
         />
+      )}
+      {isNewPromptOpen && (
+        <NewPromptModal onClose={() => setIsNewPromptOpen(false)} />
       )}
     </div>
   );

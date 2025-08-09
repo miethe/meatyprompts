@@ -3,8 +3,9 @@
     "newPrompt": "New Prompt"
   },
   "copy": {
-    "buttonLabel": "Text copied to clipboard",
-    "error": "Failed to copy text to clipboard"
+    "buttonLabel": "Copy to clipboard",
+    "error": "Failed to copy text to clipboard",
+    "success": "Copied to clipboard"
   },
   "form": {
     "title": "Title",

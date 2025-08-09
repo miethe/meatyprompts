@@ -18,7 +18,7 @@ interface Option {
 
 const PromptListFilters: React.FC = () => {
   const { lookups } = useLookups();
-  const { filterPrompts } = usePrompt(); // Assuming usePrompt returns a filter function
+  const { filterPrompts } = usePrompt();
 
   const [modelFilter, setModelFilter] = useState<readonly Option[]>([]);
   const [toolFilter, setToolFilter] = useState<readonly Option[]>([]);
@@ -30,8 +30,14 @@ const PromptListFilters: React.FC = () => {
       tool: toolFilter.length > 0 ? toolFilter[0].value : undefined,
       purpose: purposeFilter.length > 0 ? purposeFilter[0].value : undefined,
     };
-    // filterPrompts(filters);
-    console.log("Applying filters:", filters);
+    filterPrompts(filters);
+  };
+
+  const handleClear = () => {
+    setModelFilter([]);
+    setToolFilter([]);
+    setPurposeFilter([]);
+    filterPrompts({});
   };
 
   return (
@@ -78,7 +84,10 @@ const PromptListFilters: React.FC = () => {
             />
           </div>
         </div>
-        <Button onClick={handleApplyFilters} className="w-full">Apply Filters</Button>
+        <div className="flex gap-2">
+          <Button onClick={handleApplyFilters} className="flex-1">Apply</Button>
+          <Button variant="outline" onClick={handleClear} className="flex-1">Clear</Button>
+        </div>
       </SheetContent>
     </Sheet>
   );
