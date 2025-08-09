@@ -58,22 +58,29 @@ def test_empty_body_validation():
 
 def test_list_prompts_with_filters():
     mock_db = MagicMock(spec=Session)
-    query_version = MagicMock()
-    query_header = MagicMock()
-    mock_db.query.side_effect = [query_version, query_header]
+    captured: dict = {}
 
-    query_version.filter.return_value = query_version
-    query_version.join.return_value = query_version
-    query_version.order_by.return_value.all.return_value = []
-    query_header.filter.return_value.all.return_value = []
+    class DummyQuery:
+        def all(self):
+            return []
 
-    list_prompts(mock_db, model="gpt-4", provider="openai", use_case="test")
+    def _build_query(db, filters):
+        captured["filters"] = filters
+        return DummyQuery()
 
-    assert mock_db.query.call_args_list[0].args[0] is PromptVersionORM
-    assert query_version.filter.call_count == 3
+    with patch("app.services.prompt_service.search_service.build_query", _build_query):
+        list_prompts(
+            mock_db,
+            owner_id=uuid.uuid4(),
+            target_models=["gpt-4"],
+            providers=["openai"],
+            purposes=["test"],
+        )
 
-    # A more detailed test could inspect the call_args to ensure the
-    # correct filter expressions were used, but this is a good start.
+    filters = captured["filters"]
+    assert filters.target_models == ["gpt-4"]
+    assert filters.providers == ["openai"]
+    assert filters.purposes == ["test"]
 
 
 def test_get_prompt_by_id_returns_prompt():

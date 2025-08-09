@@ -7,6 +7,7 @@ from httpx import AsyncClient
 
 from app.main import app
 from app.models.prompt import Prompt
+from app.services import search_service
 
 
 @pytest.fixture
@@ -14,6 +15,7 @@ def sample_prompt() -> Prompt:
     return Prompt(
         id=uuid.uuid4(),
         prompt_id=uuid.uuid4(),
+        owner_id=uuid.uuid4(),
         version="1",
         title="t",
         body="b",
@@ -88,13 +90,56 @@ async def test_create_prompt_validation_error(monkeypatch, auth_client: AsyncCli
 @pytest.mark.asyncio
 async def test_list_prompts(monkeypatch, sample_prompt, auth_client: AsyncClient):
     def _list_prompts(*args, **kwargs):
-        return [sample_prompt]
+        return {
+            "items": [sample_prompt],
+            "next_cursor": None,
+            "count": 1,
+            "total_estimate": None,
+        }
 
     monkeypatch.setattr("app.api.prompts.prompt_service.list_prompts", _list_prompts)
-    resp = await auth_client.get("/api/v1/prompts?model=gpt-4o")
+    resp = await auth_client.get("/api/v1/prompts?q=test")
     assert resp.status_code == 200
     data = resp.json()
-    assert data[0]["title"] == "t"
+    assert data["items"][0]["title"] == "t"
+
+
+@pytest.mark.asyncio
+async def test_search_filters(monkeypatch, sample_prompt, auth_client: AsyncClient):
+    captured: dict = {}
+
+    class DummyQuery:
+        def all(self):
+            return []
+
+    def _build_query(db, filters):
+        captured["filters"] = filters
+        return DummyQuery()
+
+    monkeypatch.setattr(
+        "app.services.prompt_service.search_service.build_query", _build_query
+    )
+
+    url = (
+        "/api/v1/prompts?q=foo&tags=One&tags=two&favorite=true&archived=false"
+        "&target_models=gpt-4&providers=openai&purposes=chat&sort=title_asc&limit=5"
+    )
+    resp = await auth_client.get(url)
+    assert resp.status_code == 200
+    filters = captured["filters"]
+    assert filters.q == "foo"
+    assert filters.tags == ["one", "two"]
+    assert filters.favorite is True
+    assert filters.archived is False
+    assert filters.sort == search_service.SearchSort.title_asc
+    assert filters.limit == 5
+
+
+@pytest.mark.asyncio
+async def test_get_prompts_unauthenticated():
+    async with AsyncClient(app=app, base_url="https://test") as ac:
+        resp = await ac.get("/api/v1/prompts")
+    assert resp.status_code == 401
 
 
 @pytest.mark.asyncio

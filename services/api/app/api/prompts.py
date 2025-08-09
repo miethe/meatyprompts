@@ -2,11 +2,11 @@ import logging
 import uuid
 from typing import List, Optional
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 
 from app.db.session import get_db
-from app.models.prompt import Prompt, PromptCreate
+from app.models.prompt import Prompt, PromptCreate, PromptListResponse
 from app.services import prompt_service
 from app.api.deps import get_current_user, csrf_protect
 from app.models.user import UserORM
@@ -36,18 +36,39 @@ def create_new_prompt(
         raise HTTPException(status_code=400, detail=str(exc))
 
 
-@router.get("/prompts", response_model=List[Prompt])
+@router.get("/prompts", response_model=PromptListResponse)
 def get_prompts(
-    model: Optional[str] = None,
-    provider: Optional[str] = None,
-    use_case: Optional[str] = None,
+    q: Optional[str] = None,
+    tags: Optional[List[str]] = Query(default=None),
+    favorite: Optional[bool] = None,
+    archived: Optional[bool] = None,
+    target_models: Optional[List[str]] = Query(default=None),
+    providers: Optional[List[str]] = Query(default=None),
+    purposes: Optional[List[str]] = Query(default=None, alias="use_cases"),
+    collection_id: Optional[uuid.UUID] = None,
+    sort: str = "updated_desc",
+    limit: int = 20,
+    after: Optional[str] = None,
     db: Session = Depends(get_db),
+    current_user: UserORM = Depends(get_current_user),
 ):
-    """List prompts optionally filtered by model, provider or use case."""
+    """Search and filter prompts owned by the current user."""
 
     try:
         return prompt_service.list_prompts(
-            db=db, model=model, provider=provider, use_case=use_case
+            db=db,
+            owner_id=current_user.id,
+            q=q,
+            tags=tags,
+            favorite=favorite,
+            archived=archived,
+            target_models=target_models,
+            providers=providers,
+            purposes=purposes,
+            collection_id=collection_id,
+            sort=sort,
+            limit=limit,
+            after=after,
         )
     except Exception as exc:  # pragma: no cover - defensive
         logger.exception("prompts.list failed", exc_info=exc)
