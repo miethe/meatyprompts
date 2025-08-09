@@ -28,8 +28,8 @@ Base = declarative_base()
 class PromptAccessControl(str, PyEnum):
     """Enumeration for prompt access policies."""
 
-    PRIVATE = "private"
-    UNLISTED = "unlisted"
+    private = "private"
+    unlisted = "unlisted"
 
 
 class PromptBase(BaseModel):
@@ -58,15 +58,15 @@ class PromptBase(BaseModel):
     link: Optional[str] = None
     tags: Optional[List[str]] = None
 
-
-class PromptCreate(PromptBase):
-    """Model used when creating a new prompt version."""
-
     @validator("access_control", pre=True)
     def access_control_lower(cls, v):
         if v is not None:
             return v.lower()
         return v
+
+
+class PromptCreate(PromptBase):
+    """Model used when creating a new prompt version."""
 
 
 class Prompt(PromptBase):

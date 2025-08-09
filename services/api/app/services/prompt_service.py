@@ -32,6 +32,7 @@ def _to_prompt(version: PromptVersionORM, header: PromptHeaderORM) -> Prompt:
     return Prompt(
         id=version.id,
         prompt_id=version.prompt_id,
+        owner_id=header.owner_id,
         version=version.version,
         title=header.title,
         body=version.body,
@@ -79,7 +80,7 @@ def create_prompt(db: Session, prompt: PromptCreate, owner_id: UUID) -> Prompt:
         version="1",
         body=prompt.body,
         description=None,
-        access_control=prompt.access_control,
+        access_control=prompt.access_control.lower() if prompt.access_control else None,
         target_models=prompt.target_models or None,
         providers=prompt.providers or None,
         integrations=prompt.integrations or None,
