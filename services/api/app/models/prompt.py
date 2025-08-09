@@ -15,7 +15,7 @@ from uuid import UUID
 
 from enum import Enum as PyEnum
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, validator
 from sqlalchemy import ARRAY, Boolean, Column, ForeignKey, Index, Integer, String, TIMESTAMP, text
 from sqlalchemy.dialects.postgresql import JSONB, UUID as SA_UUID, ENUM
 from sqlalchemy.orm import declarative_base
@@ -61,6 +61,12 @@ class PromptBase(BaseModel):
 
 class PromptCreate(PromptBase):
     """Model used when creating a new prompt version."""
+
+    @validator("access_control", pre=True)
+    def access_control_lower(cls, v):
+        if v is not None:
+            return v.lower()
+        return v
 
 
 class Prompt(PromptBase):

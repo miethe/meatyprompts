@@ -9,7 +9,7 @@ from alembic.config import Config
 from sqlalchemy import create_engine, inspect, text
 import sys
 
-TEST_DB = "postgresql://root@/meatyprompts"
+TEST_DB = "postgresql://test_user:password@/meatyprompts"
 BASE_DIR = Path(__file__).resolve().parents[1]
 
 

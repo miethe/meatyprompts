@@ -122,6 +122,6 @@ def downgrade() -> None:
     op.drop_column('prompts', 'block_count')
     op.drop_column('prompts', 'is_archived')
     op.drop_column('prompts', 'is_favorite')
-    op.drop_constraint(None, 'prompts', type_='foreignkey')
+    op.drop_constraint('fk_prompts_owner_id_users', 'prompts', type_='foreignkey')
     op.drop_column('prompts', 'owner_id')
-    sa.Enum('private', 'unlisted', name='prompt_access_control').drop(op.get_bind(), checkfirst=False)
+    sa.Enum('private', 'unlisted', name='prompt_access_control').drop(op.get_bind(), checkfirst=True)

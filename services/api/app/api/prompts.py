@@ -9,6 +9,7 @@ from app.db.session import get_db
 from app.models.prompt import Prompt, PromptCreate
 from app.services import prompt_service
 from app.api.deps import get_current_user, csrf_protect
+from app.models.user import UserORM
 
 logger = logging.getLogger(__name__)
 
@@ -21,11 +22,15 @@ router = APIRouter(dependencies=[Depends(get_current_user)])
     status_code=201,
     dependencies=[Depends(csrf_protect)],
 )
-def create_new_prompt(prompt: PromptCreate, db: Session = Depends(get_db)):
+def create_new_prompt(
+    prompt: PromptCreate,
+    db: Session = Depends(get_db),
+    current_user: UserORM = Depends(get_current_user),
+):
     """Create a new prompt."""
 
     try:
-        return prompt_service.create_prompt(db=db, prompt=prompt)
+        return prompt_service.create_prompt(db=db, prompt=prompt, owner_id=current_user.id)
     except Exception as exc:  # pragma: no cover - defensive
         logger.exception("prompts.create failed", exc_info=exc)
         raise HTTPException(status_code=400, detail=str(exc))
