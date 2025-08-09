@@ -54,18 +54,26 @@ def upgrade() -> None:
         sa.Column('created_at', sa.TIMESTAMP(timezone=True), server_default=sa.text('now()'), nullable=False),
     )
 
-    resource_type = sa.Enum('prompt','collection','model','integration','tag', name='resource_type')
-    resource_visibility = sa.Enum('private','internal','public', name='resource_visibility')
-    resource_type.create(op.get_bind(), checkfirst=True)
-    resource_visibility.create(op.get_bind(), checkfirst=True)
+    # Create enums only if they do not exist
+    op.execute("""
+    DO $$
+    BEGIN
+        IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'resource_type') THEN
+            CREATE TYPE resource_type AS ENUM ('prompt','collection','model','integration','tag');
+        END IF;
+        IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'resource_visibility') THEN
+            CREATE TYPE resource_visibility AS ENUM ('private','internal','public');
+        END IF;
+    END$$;
+    """)
 
     op.create_table(
         'resources',
         sa.Column('id', postgresql.UUID(as_uuid=True), primary_key=True, nullable=False),
         sa.Column('tenant_id', postgresql.UUID(as_uuid=True), nullable=False),
         sa.Column('workspace_id', postgresql.UUID(as_uuid=True), nullable=False),
-        sa.Column('type', resource_type, nullable=False),
-        sa.Column('visibility', resource_visibility, nullable=False, server_default='private'),
+        sa.Column('type', postgresql.ENUM('prompt','collection','model','integration','tag', name='resource_type', create_type=False), nullable=False),
+        sa.Column('visibility', postgresql.ENUM('private','internal','public', name='resource_visibility', create_type=False), nullable=False, server_default='private'),
         sa.Column('updated_at', sa.TIMESTAMP(timezone=True), server_default=sa.text('now()'), nullable=False),
         sa.Column('created_at', sa.TIMESTAMP(timezone=True), server_default=sa.text('now()'), nullable=False),
     )
@@ -123,8 +131,8 @@ def downgrade() -> None:
     op.drop_index('ix_resources_tenant_type', table_name='resources')
     op.drop_index('ix_resources_tenant_workspace_updated', table_name='resources')
     op.drop_table('resources')
-    sa.Enum(name='resource_visibility').drop(op.get_bind(), checkfirst=True)
-    sa.Enum(name='resource_type').drop(op.get_bind(), checkfirst=True)
+    op.execute("DROP TYPE IF EXISTS resource_visibility;")
+    op.execute("DROP TYPE IF EXISTS resource_type;")
     op.drop_table('workspaces')
     op.drop_table('team_members')
     op.drop_table('org_members')
