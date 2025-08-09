@@ -38,21 +38,85 @@ def create_new_prompt(
 
 @router.get("/prompts", response_model=PromptListResponse)
 def get_prompts(
-    q: Optional[str] = None,
-    tags: Optional[List[str]] = Query(default=None),
-    favorite: Optional[bool] = None,
-    archived: Optional[bool] = None,
-    target_models: Optional[List[str]] = Query(default=None),
-    providers: Optional[List[str]] = Query(default=None),
-    purposes: Optional[List[str]] = Query(default=None, alias="use_cases"),
-    collection_id: Optional[uuid.UUID] = None,
-    sort: str = "updated_desc",
-    limit: int = 20,
-    after: Optional[str] = None,
+    q: Optional[str] = Query(
+        default=None, description="Full-text search applied to titles and bodies"
+    ),
+    tags: Optional[List[str]] = Query(
+        default=None, description="Filter results to prompts tagged with any of these values"
+    ),
+    favorite: Optional[bool] = Query(
+        default=None, description="If true, only return prompts marked as favorites"
+    ),
+    archived: Optional[bool] = Query(
+        default=None, description="If true, only return prompts that have been archived"
+    ),
+    target_models: Optional[List[str]] = Query(
+        default=None, description="Restrict prompts to those targeting the given LLM models"
+    ),
+    providers: Optional[List[str]] = Query(
+        default=None, description="Restrict prompts to those from the specified model providers"
+    ),
+    purposes: Optional[List[str]] = Query(
+        default=None,
+        alias="use_cases",
+        description="Filter by declared use cases for the prompt",
+    ),
+    collection_id: Optional[uuid.UUID] = Query(
+        default=None, description="Limit results to a specific collection"
+    ),
+    sort: str = Query(
+        default="updated_desc",
+        description="Sort order for returned prompts (e.g., updated_desc)",
+    ),
+    limit: int = Query(
+        default=20,
+        ge=1,
+        le=100,
+        description="Maximum number of prompts to return per page",
+    ),
+    after: Optional[str] = Query(
+        default=None,
+        description=(
+            "Cursor for pagination. Use the `next_cursor` value from a previous "
+            "response to retrieve subsequent pages."
+        ),
+    ),
     db: Session = Depends(get_db),
     current_user: UserORM = Depends(get_current_user),
 ):
-    """Search and filter prompts owned by the current user."""
+    """Search and filter prompts owned by the current user.
+
+    Parameters
+    ----------
+    q:
+        Full-text search term applied to prompt titles and bodies.
+    tags:
+        One or more tag names to filter by.
+    favorite:
+        When true, only return prompts marked as favorites.
+    archived:
+        When true, return only prompts that have been archived.
+    target_models:
+        Restrict prompts to those targeting the provided LLM model identifiers.
+    providers:
+        Restrict prompts to those originating from the given model providers.
+    purposes:
+        Filter by declared use cases for the prompt.
+    collection_id:
+        Limit results to prompts within the specified collection.
+    sort:
+        Sort order for returned prompts (e.g., ``updated_desc``).
+    limit:
+        Maximum number of prompts to return per page.
+    after:
+        Cursor for pagination. Pass the ``next_cursor`` value from a previous
+        response to continue listing prompts.
+
+    Returns
+    -------
+    PromptListResponse
+        A paginated list of prompts matching the query.
+    """
 
     try:
         return prompt_service.list_prompts(
