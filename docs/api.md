@@ -36,4 +36,9 @@ Returns a paginated list of prompts for the authenticated user.
 
 The `next_cursor` value should be sent in the `after` query parameter to
 retrieve the next page.  The cursor format is opaque and may change over
- time.
+time.
+
+## GET /_int/tenancy/ping
+
+Internal endpoint that returns the current tenant identifier from the session
+context. It is intended for development and testing of tenancy features.
