@@ -4,6 +4,10 @@ from __future__ import annotations
 import os
 from fastapi import Depends, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from sqlalchemy import text
+
+from app.db import get_db
+from app.db.rls import rls_middleware
 
 
 def create_app() -> FastAPI:
@@ -22,10 +26,19 @@ def create_app() -> FastAPI:
         allow_headers=["*"],
     )
 
+    app.middleware("http")(rls_middleware)
+
     @app.get("/healthz", tags=["health"])
     async def health() -> dict[str, str]:
         """Simple health check endpoint."""
         return {"status": "ok"}
+
+    @app.get("/_int/tenancy/ping")
+    async def tenancy_ping(db=Depends(get_db)) -> dict[str, str | None]:
+        """Internal endpoint returning the current tenant id."""
+        tenant = db.execute(text("SELECT current_tenant()"))
+        value = tenant.scalar()
+        return {"tenant_id": str(value) if value else None}
 
     from app.api import auth, prompts, collections
     from app.api.endpoints import lookups, metadata, tags
