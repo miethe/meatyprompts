@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import CodeEditor, { LANGUAGE_OPTIONS, Language } from './CodeEditor';
+import CodeEditor from './CodeEditor';
+import MarkdownEditor from './editor/MarkdownEditor';
 import CopyIconButton from './common/CopyIconButton';
 import {
   Dialog,
@@ -32,11 +33,6 @@ interface PromptDetailModalProps {
 const PromptDetailModal: React.FC<PromptDetailModalProps> = ({ prompt, isOpen, onClose, onSave }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [editedPrompt, setEditedPrompt] = useState<Prompt>(prompt);
-  const [language, setLanguage] = useState<Language>(
-    prompt.output_format && LANGUAGE_OPTIONS.includes(prompt.output_format as Language)
-      ? (prompt.output_format as Language)
-      : 'plaintext'
-  );
 
   const handleSave = () => {
     onSave(editedPrompt);
@@ -76,24 +72,10 @@ const PromptDetailModal: React.FC<PromptDetailModalProps> = ({ prompt, isOpen, o
             {isEditing ? (
               <div className="col-span-3">
                 <div className="flex items-center mb-2">
-                  <select
-                    className="p-2 border rounded"
-                    value={language}
-                    onChange={(e) => {
-                      const lang = e.target.value as Language;
-                      setLanguage(lang);
-                      setEditedPrompt({ ...editedPrompt, output_format: lang });
-                    }}
-                  >
-                    {LANGUAGE_OPTIONS.map((opt) => (
-                      <option key={opt} value={opt}>{opt}</option>
-                    ))}
-                  </select>
                   <CopyIconButton text={editedPrompt.body} />
                 </div>
-                <CodeEditor
+                <MarkdownEditor
                   value={editedPrompt.body}
-                  language={language}
                   onChange={(val) => setEditedPrompt({ ...editedPrompt, body: val })}
                 />
               </div>

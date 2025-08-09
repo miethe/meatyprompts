@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from datetime import datetime
 import logging
+import time
 import uuid
 import re
 from typing import List
@@ -215,6 +216,8 @@ def get_prompt_by_id(db: Session, prompt_id: UUID) -> Prompt | None:
 def update_prompt(db: Session, prompt_id: UUID, prompt_update: PromptCreate) -> Prompt | None:
     """Update the latest version of a prompt without version bump."""
 
+    start = time.perf_counter()
+
     latest_version: PromptVersionORM | None = (
         db.query(PromptVersionORM)
         .filter(PromptVersionORM.prompt_id == prompt_id)
@@ -270,8 +273,19 @@ def update_prompt(db: Session, prompt_id: UUID, prompt_update: PromptCreate) -> 
     db.refresh(latest_version)
     db.refresh(header)
 
+    elapsed_ms = (time.perf_counter() - start) * 1000
+    body_bytes = len((latest_version.body or "").encode("utf-8"))
+
     logger.info(
         "prompts.update",
         extra={"prompt_id": str(prompt_id), "user_id": "unknown"},
+    )
+    logger.info(
+        "events.prompt_edited",
+        extra={
+            "prompt_id": str(prompt_id),
+            "bytes": body_bytes,
+            "elapsed_ms": round(elapsed_ms, 2),
+        },
     )
     return _to_prompt(latest_version, header)

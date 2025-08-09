@@ -7,7 +7,7 @@ describe('PromptCard', () => {
     id: '1',
     title: 'Test Prompt',
     body: 'This is the body of the prompt.',
-    version: 1,
+    version: '1',
     purpose: ['testing'],
     models: ['gpt-4'],
     tags: ['tag1', 'tag2'],
@@ -37,5 +37,6 @@ describe('PromptCard', () => {
     const button = screen.getByLabelText('Copy to clipboard');
     fireEvent.click(button);
     expect(writeText).toHaveBeenCalledWith('This is the body of the prompt.');
+    expect(screen.getByText('Copied to clipboard')).toBeInTheDocument();
   });
 });

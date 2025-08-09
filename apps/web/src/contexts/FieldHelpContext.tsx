@@ -14,12 +14,24 @@ const defaultHelp: FieldHelp = {
 
 const FieldHelpContext = createContext<FieldHelpContextType | undefined>(undefined);
 
+function getCookie(name: string): string | undefined {
+  if (typeof document === 'undefined') return undefined;
+  const match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
+  return match ? decodeURIComponent(match[2]) : undefined;
+}
+
 export const FieldHelpProvider = ({ children }: { children: ReactNode }) => {
   const [help, setHelp] = useState<FieldHelp>(defaultHelp);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchHelp = async () => {
+      // Only fetch if session cookie is present
+      const session = getCookie('session') || getCookie('meatyprompts_session');
+      if (!session) {
+        setLoading(false);
+        return;
+      }
       try {
         const data = await getFieldHelp();
         setHelp(data);

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Copy } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import Toast from './Toast';
 
 interface CopyIconButtonProps {
   text: string;
@@ -22,16 +23,19 @@ const CopyIconButton: React.FC<CopyIconButtonProps> = ({ text }) => {
   };
 
   return (
-    <button aria-label={t('copy.buttonLabel')} onClick={handleCopy} className="ml-2 text-gray-400 hover:text-gray-200">
-      <Copy className="w-4 h-4" />
-      <span
-        className="sr-only"
-        aria-live="polite"
-        aria-atomic="true"
+    <>
+      <button
+        aria-label={t('copy.buttonLabel')}
+        onClick={handleCopy}
+        className="ml-2 text-gray-400 hover:text-gray-200"
       >
-        {copied ? t('copy.success') : ''}
-      </span>
-    </button>
+        <Copy className="w-4 h-4" />
+        <span className="sr-only" aria-live="polite" aria-atomic="true">
+          {copied ? t('copy.success') : ''}
+        </span>
+      </button>
+      {copied && <Toast message={t('copy.success')} />}
+    </>
   );
 };
 

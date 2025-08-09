@@ -1,5 +1,5 @@
 import { createContext, useReducer, useEffect, FC, ReactNode, useContext } from 'react';
-import { fetchPrompts } from '@/lib/api/fetchPrompts';
+import { fetchPrompts, PromptFilters } from '@/lib/api/fetchPrompts';
 import { createPrompt as createPromptApi } from '@/lib/api/createPrompt';
 import { Prompt, ManualPromptInput } from '@/types/Prompt';
 
@@ -15,6 +15,7 @@ interface PromptContextType {
   state: PromptState;
   dispatch: React.Dispatch<PromptAction>;
   createPrompt: (prompt: ManualPromptInput) => Promise<void>;
+  filterPrompts: (filters: PromptFilters) => Promise<void>;
 }
 
 interface PromptProviderProps {
@@ -34,10 +35,19 @@ function promptReducer(state: PromptState, action: PromptAction): PromptState {
   }
 }
 
+function getCookie(name: string): string | undefined {
+  if (typeof document === 'undefined') return undefined;
+  const match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
+  return match ? decodeURIComponent(match[2]) : undefined;
+}
+
 export const PromptProvider: FC<PromptProviderProps> = ({ children }) => {
   const [state, dispatch] = useReducer(promptReducer, { prompts: [] });
 
   useEffect(() => {
+    // Only fetch prompts if session cookie is present
+    const session = getCookie('session') || getCookie('meatyprompts_session');
+    if (!session) return;
     fetchPrompts().then(data => dispatch({ type: 'LOAD', payload: data }));
   }, []);
 
@@ -46,8 +56,13 @@ export const PromptProvider: FC<PromptProviderProps> = ({ children }) => {
     dispatch({ type: 'CREATE', payload: newPrompt });
   };
 
+  const filterPrompts = async (filters: PromptFilters) => {
+    const data = await fetchPrompts(filters);
+    dispatch({ type: 'LOAD', payload: data });
+  };
+
   return (
-    <PromptContext.Provider value={{ state, dispatch, createPrompt }}>
+    <PromptContext.Provider value={{ state, dispatch, createPrompt, filterPrompts }}>
       {children}
     </PromptContext.Provider>
   );

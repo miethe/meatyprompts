@@ -64,6 +64,13 @@ class PromptBase(BaseModel):
             return v.lower()
         return v
 
+    @validator("title", "body")
+    def not_empty(cls, value: str) -> str:
+        """Ensure required string fields are not blank."""
+        if value is None or not value.strip():
+            raise ValueError("must not be empty")
+        return value
+
 
 class PromptCreate(PromptBase):
     """Model used when creating a new prompt version."""
