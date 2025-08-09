@@ -98,10 +98,21 @@ class Prompt(PromptBase):
 class PromptListResponse(BaseModel):
     """Paginated response model for ``GET /prompts``."""
 
-    items: List[Prompt]
-    next_cursor: Optional[str] = None
-    count: int
-    total_estimate: Optional[int] = None
+    items: List[Prompt] = Field(
+        ..., description="Prompts returned in the current page"
+    )
+    next_cursor: Optional[str] = Field(
+        default=None,
+        description=(
+            "Cursor for fetching the next page. Pass this value to the "
+            "`after` query parameter on subsequent requests."
+        ),
+    )
+    count: int = Field(..., description="Number of prompts in this response")
+    total_estimate: Optional[int] = Field(
+        default=None,
+        description="Approximate total number of prompts matching the query",
+    )
 
 
 class PromptHeaderORM(Base):
