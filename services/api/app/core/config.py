@@ -2,6 +2,7 @@ from pydantic_settings import BaseSettings
 
 class Settings(BaseSettings):
     DATABASE_URL: str
+    DATABASE_URL_TEST: str
     API_V1_STR: str = "/api/v1"
     PROJECT_NAME: str = "MeatyPrompts"
     AUTH_COOKIE_NAME: str = "mp_session"

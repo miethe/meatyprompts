@@ -5,8 +5,11 @@ from __future__ import annotations
 import uuid
 from sqlalchemy import create_engine, text
 
-DATABASE_URL = "postgresql://test_user:password@/meatyprompts"
+from services.api.app.core.config import settings
 
+DATABASE_URL = settings.DATABASE_URL_TEST
+if not DATABASE_URL:
+    raise RuntimeError("DATABASE_URL_TEST is not set in the environment or .env file.")
 
 def main() -> None:
     engine = create_engine(DATABASE_URL)

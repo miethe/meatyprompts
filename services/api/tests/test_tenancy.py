@@ -11,9 +11,13 @@ from alembic.config import Config
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine, inspect, text
 
-TEST_DB = "postgresql://test_user:password@/meatyprompts"
-BASE_DIR = Path(__file__).resolve().parents[1]
+from services.api.app.core.config import settings
 
+TEST_DB = settings.DATABASE_URL_TEST
+if not TEST_DB:
+    raise RuntimeError("DATABASE_URL_TEST is not set in the environment or .env file.")
+
+BASE_DIR = Path(__file__).resolve().parents[1]
 
 def run_migrations() -> None:
     cfg = Config(str(BASE_DIR / "alembic.ini"))
