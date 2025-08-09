@@ -97,4 +97,20 @@ describe('PromptDetailModal', () => {
     await waitFor(() => expect(copyText).toHaveBeenCalledWith('initial'));
     expect(track).toHaveBeenCalledWith('prompt_copied', expect.objectContaining({ variant: 'body', source: 'detail' }));
   });
+
+  it('renders duplicate button and fires handler', () => {
+    const handleDuplicate = jest.fn();
+    render(
+      <PromptDetailModal
+        prompt={basePrompt}
+        isOpen={true}
+        onClose={() => {}}
+        onSave={() => {}}
+        onDuplicate={handleDuplicate}
+      />
+    );
+    const button = screen.getByLabelText('Duplicate prompt');
+    fireEvent.click(button);
+    expect(handleDuplicate).toHaveBeenCalled();
+  });
 });

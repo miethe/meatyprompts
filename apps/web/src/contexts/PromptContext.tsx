@@ -1,6 +1,7 @@
 import { createContext, useReducer, useEffect, FC, ReactNode, useContext } from 'react';
 import { fetchPrompts, PromptFilters } from '@/lib/api/fetchPrompts';
 import { createPrompt as createPromptApi } from '@/lib/api/createPrompt';
+import { duplicatePrompt as duplicatePromptApi } from '@/lib/api/duplicatePrompt';
 import { Prompt, ManualPromptInput } from '@/types/Prompt';
 
 interface PromptState {
@@ -16,6 +17,7 @@ interface PromptContextType {
   dispatch: React.Dispatch<PromptAction>;
   createPrompt: (prompt: ManualPromptInput) => Promise<void>;
   filterPrompts: (filters: PromptFilters) => Promise<void>;
+  duplicatePrompt: (promptId: string) => Promise<void>;
 }
 
 interface PromptProviderProps {
@@ -61,8 +63,13 @@ export const PromptProvider: FC<PromptProviderProps> = ({ children }) => {
     dispatch({ type: 'LOAD', payload: data });
   };
 
+  const duplicatePrompt = async (promptId: string) => {
+    const newPrompt = await duplicatePromptApi(promptId);
+    dispatch({ type: 'CREATE', payload: newPrompt });
+  };
+
   return (
-    <PromptContext.Provider value={{ state, dispatch, createPrompt, filterPrompts }}>
+    <PromptContext.Provider value={{ state, dispatch, createPrompt, filterPrompts, duplicatePrompt }}>
       {children}
     </PromptContext.Provider>
   );

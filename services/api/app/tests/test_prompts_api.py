@@ -186,3 +186,50 @@ async def test_update_prompt_empty_body(monkeypatch, auth_client: AsyncClient):
         f"/api/v1/prompts/{uuid.uuid4()}", json=payload, headers=headers
     )
     assert resp.status_code == 422
+
+
+@pytest.mark.asyncio
+async def test_duplicate_prompt(monkeypatch, sample_prompt, auth_client: AsyncClient):
+    def _duplicate_prompt(*args, **kwargs):
+        return sample_prompt
+
+    monkeypatch.setattr(
+        "app.api.prompts.prompt_service.duplicate_prompt", _duplicate_prompt
+    )
+    headers = {"X-CSRF-Token": auth_client.cookies.get("csrf_token")}
+    resp = await auth_client.post(
+        f"/api/v1/prompts/{sample_prompt.prompt_id}/duplicate",
+        headers=headers,
+    )
+    assert resp.status_code == 201
+    data = resp.json()
+    assert data["title"] == "t"
+
+
+@pytest.mark.asyncio
+async def test_duplicate_prompt_not_found(monkeypatch, auth_client: AsyncClient):
+    def _duplicate_prompt(*args, **kwargs):
+        return None
+
+    monkeypatch.setattr(
+        "app.api.prompts.prompt_service.duplicate_prompt", _duplicate_prompt
+    )
+    headers = {"X-CSRF-Token": auth_client.cookies.get("csrf_token")}
+    resp = await auth_client.post(
+        f"/api/v1/prompts/{uuid.uuid4()}/duplicate",
+        headers=headers,
+    )
+    assert resp.status_code == 404
+
+
+@pytest.mark.asyncio
+async def test_duplicate_prompt_unauthenticated(monkeypatch):
+    def _duplicate_prompt(*args, **kwargs):
+        return None
+
+    monkeypatch.setattr(
+        "app.api.prompts.prompt_service.duplicate_prompt", _duplicate_prompt
+    )
+    async with AsyncClient(app=app, base_url="https://test") as ac:
+        resp = await ac.post(f"/api/v1/prompts/{uuid.uuid4()}/duplicate")
+    assert resp.status_code == 401
