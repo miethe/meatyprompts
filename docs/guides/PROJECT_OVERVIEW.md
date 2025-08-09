@@ -164,6 +164,12 @@ A dedicated API client service in the frontend abstracts all HTTP requests to th
 - **Global UI State**: Managed by React Context for cross-cutting concerns like authentication status and the current theme.
 - **Local Component State**: Managed with standard React hooks like `useState` and `useReducer`.
 
+### Authentication
+
+Authentication is handled by Clerk. Users sign in via Clerk's hosted UI and receive
+JSON Web Tokens (JWTs). The frontend attaches these tokens to API requests in the
+`Authorization` header, and the backend verifies them to identify the current user.
+
 ## Typical Development Workflow
 
 1. Start the entire stack: `make dev-up`.

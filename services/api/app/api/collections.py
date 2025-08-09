@@ -8,7 +8,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query, Response
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
-from app.api.deps import csrf_protect, get_current_user
+from app.api.deps import get_current_user
 from app.db.session import get_db
 from app.models.collection import Collection, CollectionCreate
 from app.models.prompt import PromptListResponse
@@ -36,7 +36,6 @@ def list_collections(
     "/collections",
     response_model=Collection,
     status_code=201,
-    dependencies=[Depends(csrf_protect)],
 )
 def create_collection(
     payload: CollectionCreate,
@@ -56,7 +55,6 @@ def create_collection(
 @router.patch(
     "/collections/{collection_id}",
     response_model=Collection,
-    dependencies=[Depends(csrf_protect)],
 )
 def rename_collection(
     collection_id: uuid.UUID,
@@ -84,7 +82,6 @@ def rename_collection(
     "/collections/{collection_id}",
     status_code=204,
     response_class=Response,
-    dependencies=[Depends(csrf_protect)],
 )
 def delete_collection(
     collection_id: uuid.UUID,
@@ -131,7 +128,6 @@ class CollectionPromptPayload(BaseModel):
 
 @router.post(
     "/collections/{collection_id}/prompts",
-    dependencies=[Depends(csrf_protect)],
 )
 def add_prompt(
     collection_id: uuid.UUID,
@@ -157,7 +153,6 @@ def add_prompt(
     "/collections/{collection_id}/prompts/{prompt_id}",
     status_code=204,
     response_class=Response,
-    dependencies=[Depends(csrf_protect)],
 )
 def remove_prompt(
     collection_id: uuid.UUID,

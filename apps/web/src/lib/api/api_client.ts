@@ -11,12 +11,6 @@ export interface ApiRequestOptions {
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 
-function getCookie(name: string): string | undefined {
-  if (typeof document === 'undefined') return undefined;
-  const match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
-  return match ? decodeURIComponent(match[2]) : undefined;
-}
-
 export async function apiRequest<T = any>({
   method = 'GET',
   endpoint,
@@ -32,14 +26,15 @@ export async function apiRequest<T = any>({
     });
     url += (url.includes('?') ? '&' : '?') + params.toString();
   }
-  const isMutating = ['POST', 'PUT', 'PATCH', 'DELETE'].includes(method.toUpperCase());
-  const csrfToken = isMutating ? getCookie('csrf_token') : undefined;
+  let token: string | undefined;
+  if (typeof window !== 'undefined' && (window as any).Clerk?.session) {
+    token = await (window as any).Clerk.session.getToken();
+  }
   const fetchOptions: RequestInit = {
     method,
-    credentials: 'include',
     headers: {
       'Content-Type': 'application/json',
-      ...(isMutating && csrfToken ? { 'X-CSRF-Token': csrfToken } : {}),
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
       ...headers,
     },
   };

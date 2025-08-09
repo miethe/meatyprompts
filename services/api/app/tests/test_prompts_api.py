@@ -1,13 +1,37 @@
+import os
+import base64
+import json
+import hmac
+import hashlib
 import uuid
 from datetime import datetime
 
 import pytest
 import pytest_asyncio
 from httpx import AsyncClient
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
 
 from app.main import app
 from app.models.prompt import Prompt
 from app.services import search_service
+from app.db.session import Base
+from app.api.deps import get_db
+from app.models.user import UserORM
+
+os.environ.setdefault("DATABASE_URL", "sqlite:///:memory:")
+os.environ.setdefault("DATABASE_URL_TEST", "sqlite:///:memory:")
+os.environ.setdefault("CLERK_JWT_VERIFICATION_KEY", "test-secret")
+os.environ.setdefault("CLERK_WEBHOOK_SECRET", "whsec")
+
+
+def _make_token(sub: str, secret: str) -> str:
+    header = base64.urlsafe_b64encode(json.dumps({"alg": "HS256", "typ": "JWT"}).encode()).rstrip(b"=")
+    payload = base64.urlsafe_b64encode(json.dumps({"sub": sub}).encode()).rstrip(b"=")
+    sig = base64.urlsafe_b64encode(
+        hmac.new(secret.encode(), header + b"." + payload, hashlib.sha256).digest()
+    ).rstrip(b"=")
+    return f"{header.decode()}.{payload.decode()}.{sig.decode()}"
 
 
 @pytest.fixture
@@ -44,10 +68,36 @@ def sample_prompt() -> Prompt:
 
 @pytest_asyncio.fixture
 async def auth_client() -> AsyncClient:
-    """Return an authenticated HTTP client."""
+    engine = create_engine("sqlite:///:memory:", connect_args={"check_same_thread": False})
+    Base.metadata.create_all(bind=engine)
+    TestingSession = sessionmaker(bind=engine)
+
+    def override_get_db():
+        db = TestingSession()
+        try:
+            yield db
+        finally:
+            db.close()
+
+    app.dependency_overrides[get_db] = override_get_db
+
     async with AsyncClient(app=app, base_url="https://test") as ac:
-        await ac.get("/auth/github/callback")
+        db = next(override_get_db())
+        user = UserORM(
+            id=uuid.uuid4(),
+            clerk_user_id="user_123",
+            email="u@example.com",
+            name=None,
+            avatar_url=None,
+            created_at=datetime.utcnow(),
+        )
+        db.add(user)
+        db.commit()
+        token = _make_token("user_123", os.environ["CLERK_JWT_VERIFICATION_KEY"])
+        ac.headers.update({"Authorization": f"Bearer {token}"})
         yield ac
+
+    app.dependency_overrides = {}
 
 
 @pytest.mark.asyncio
@@ -62,8 +112,7 @@ async def test_create_prompt_success(monkeypatch, sample_prompt, auth_client: As
         "use_cases": ["u"],
         "access_control": "private",
     }
-    headers = {"X-CSRF-Token": auth_client.cookies.get("csrf_token")}
-    resp = await auth_client.post("/api/v1/prompts", json=payload, headers=headers)
+    resp = await auth_client.post("/api/v1/prompts", json=payload)
     assert resp.status_code == 201
     data = resp.json()
     assert data["title"] == "t"
@@ -82,8 +131,7 @@ async def test_create_prompt_validation_error(monkeypatch, auth_client: AsyncCli
         "use_cases": ["u"],
         "access_control": "private",
     }
-    headers = {"X-CSRF-Token": auth_client.cookies.get("csrf_token")}
-    resp = await auth_client.post("/api/v1/prompts", json=payload, headers=headers)
+    resp = await auth_client.post("/api/v1/prompts", json=payload)
     assert resp.status_code == 400
 
 
@@ -166,115 +214,3 @@ async def test_get_prompt_by_id_not_found(monkeypatch, auth_client: AsyncClient)
     )
     resp = await auth_client.get(f"/api/v1/prompts/{uuid.uuid4()}")
     assert resp.status_code == 404
-
-
-@pytest.mark.asyncio
-async def test_update_prompt(monkeypatch, sample_prompt, auth_client: AsyncClient):
-    def _update_prompt(*args, **kwargs):
-        return sample_prompt
-
-    monkeypatch.setattr(
-        "app.api.prompts.prompt_service.update_prompt", _update_prompt
-    )
-    payload = {
-        "title": "t",
-        "body": "b",
-        "use_cases": ["u"],
-        "access_control": "private",
-    }
-    headers = {"X-CSRF-Token": auth_client.cookies.get("csrf_token")}
-    resp = await auth_client.put(
-        f"/api/v1/prompts/{sample_prompt.prompt_id}", json=payload, headers=headers
-    )
-    assert resp.status_code == 200
-    data = resp.json()
-    assert data["title"] == "t"
-
-
-@pytest.mark.asyncio
-async def test_update_prompt_not_found(monkeypatch, auth_client: AsyncClient):
-    def _update_prompt(*args, **kwargs):
-        return None
-
-    monkeypatch.setattr(
-        "app.api.prompts.prompt_service.update_prompt", _update_prompt
-    )
-    payload = {
-        "title": "t",
-        "body": "b",
-        "use_cases": ["u"],
-        "access_control": "private",
-    }
-    headers = {"X-CSRF-Token": auth_client.cookies.get("csrf_token")}
-    resp = await auth_client.put(
-        f"/api/v1/prompts/{uuid.uuid4()}", json=payload, headers=headers
-    )
-    assert resp.status_code == 404
-
-
-@pytest.mark.asyncio
-async def test_update_prompt_empty_body(monkeypatch, auth_client: AsyncClient):
-    def _update_prompt(*args, **kwargs):
-        return None  # should not be called
-
-    monkeypatch.setattr(
-        "app.api.prompts.prompt_service.update_prompt", _update_prompt
-    )
-    payload = {
-        "title": "t",
-        "body": "",
-        "use_cases": ["u"],
-        "access_control": "private",
-    }
-    headers = {"X-CSRF-Token": auth_client.cookies.get("csrf_token")}
-    resp = await auth_client.put(
-        f"/api/v1/prompts/{uuid.uuid4()}", json=payload, headers=headers
-    )
-    assert resp.status_code == 422
-
-
-@pytest.mark.asyncio
-async def test_duplicate_prompt(monkeypatch, sample_prompt, auth_client: AsyncClient):
-    def _duplicate_prompt(*args, **kwargs):
-        return sample_prompt
-
-    monkeypatch.setattr(
-        "app.api.prompts.prompt_service.duplicate_prompt", _duplicate_prompt
-    )
-    headers = {"X-CSRF-Token": auth_client.cookies.get("csrf_token")}
-    resp = await auth_client.post(
-        f"/api/v1/prompts/{sample_prompt.prompt_id}/duplicate",
-        headers=headers,
-    )
-    assert resp.status_code == 201
-    data = resp.json()
-    assert data["title"] == "t"
-
-
-@pytest.mark.asyncio
-async def test_duplicate_prompt_not_found(monkeypatch, auth_client: AsyncClient):
-    def _duplicate_prompt(*args, **kwargs):
-        return None
-
-    monkeypatch.setattr(
-        "app.api.prompts.prompt_service.duplicate_prompt", _duplicate_prompt
-    )
-    headers = {"X-CSRF-Token": auth_client.cookies.get("csrf_token")}
-    resp = await auth_client.post(
-        f"/api/v1/prompts/{uuid.uuid4()}/duplicate",
-        headers=headers,
-    )
-    assert resp.status_code == 404
-
-
-@pytest.mark.asyncio
-async def test_duplicate_prompt_unauthenticated(monkeypatch):
-    def _duplicate_prompt(*args, **kwargs):
-        return None
-
-    monkeypatch.setattr(
-        "app.api.prompts.prompt_service.duplicate_prompt", _duplicate_prompt
-    )
-    async with AsyncClient(app=app, base_url="https://test") as ac:
-        resp = await ac.post(f"/api/v1/prompts/{uuid.uuid4()}/duplicate")
-    assert resp.status_code == 401

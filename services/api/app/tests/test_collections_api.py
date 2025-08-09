@@ -1,12 +1,15 @@
 import uuid
 from datetime import datetime
 
+import uuid
+from datetime import datetime
+
 import pytest
 import pytest_asyncio
 from httpx import AsyncClient
 
 from app.main import app
-from app.api.deps import get_current_user, csrf_protect
+from app.api.deps import get_current_user
 from app.models.collection import Collection
 from app.models.user import UserORM
 
@@ -33,8 +36,6 @@ async def auth_client() -> AsyncClient:
             created_at=datetime.utcnow(),
         )
         app.dependency_overrides[get_current_user] = lambda: user
-        app.dependency_overrides[csrf_protect] = lambda: True
-        ac.cookies.set("csrf_token", "token")
         yield ac
     app.dependency_overrides = {}
 
@@ -61,9 +62,8 @@ async def test_create_collection_conflict(monkeypatch, auth_client: AsyncClient)
     monkeypatch.setattr(
         "app.api.collections.collection_service.create_collection", _create_collection
     )
-    headers = {"X-CSRF-Token": auth_client.cookies.get("csrf_token")}
     resp = await auth_client.post(
-        "/api/v1/collections", json={"name": "Work"}, headers=headers
+        "/api/v1/collections", json={"name": "Work"}
     )
     assert resp.status_code == 409
 
@@ -76,12 +76,10 @@ async def test_add_prompt_permission_error(monkeypatch, auth_client: AsyncClient
     monkeypatch.setattr(
         "app.api.collections.collection_service.add_prompt", _add_prompt
     )
-    headers = {"X-CSRF-Token": auth_client.cookies.get("csrf_token")}
     cid, pid = uuid.uuid4(), uuid.uuid4()
     resp = await auth_client.post(
         f"/api/v1/collections/{cid}/prompts",
         json={"prompt_id": str(pid)},
-        headers=headers,
     )
     assert resp.status_code == 403
 
