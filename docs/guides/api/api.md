@@ -48,6 +48,17 @@ Returns the created prompt including header fields.
 
 Updates the latest version of a prompt without creating a new version.
 
+**Request Body:**
+
+```json
+{
+  "title": "Updated title",
+  "body": "## markdown body",
+  "use_cases": ["testing"],
+  "access_control": "private"
+}
+```
+
 **Response:**
 
 Returns the updated prompt including header fields.

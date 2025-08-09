@@ -165,3 +165,24 @@ async def test_update_prompt_not_found(monkeypatch, auth_client: AsyncClient):
         f"/api/v1/prompts/{uuid.uuid4()}", json=payload, headers=headers
     )
     assert resp.status_code == 404
+
+
+@pytest.mark.asyncio
+async def test_update_prompt_empty_body(monkeypatch, auth_client: AsyncClient):
+    def _update_prompt(*args, **kwargs):
+        return None  # should not be called
+
+    monkeypatch.setattr(
+        "app.api.prompts.prompt_service.update_prompt", _update_prompt
+    )
+    payload = {
+        "title": "t",
+        "body": "",
+        "use_cases": ["u"],
+        "access_control": "private",
+    }
+    headers = {"X-CSRF-Token": auth_client.cookies.get("csrf_token")}
+    resp = await auth_client.put(
+        f"/api/v1/prompts/{uuid.uuid4()}", json=payload, headers=headers
+    )
+    assert resp.status_code == 422
