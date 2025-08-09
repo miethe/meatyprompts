@@ -5,7 +5,12 @@
   "copy": {
     "buttonLabel": "Copy to clipboard",
     "error": "Failed to copy text to clipboard",
-    "success": "Copied to clipboard"
+    "success": "Copied to clipboard",
+    "quick": "Copy body",
+    "menuTitle": "Copy options",
+    "body": "Copy body",
+    "frontMatter": "Copy body + front-matter",
+    "json": "Copy JSON"
   },
   "form": {
     "title": "Title",
@@ -28,5 +33,8 @@
     "accessControl": "Access Control",
     "cancel": "Cancel",
     "submit": "Submit"
+  },
+  "toast": {
+    "copied": "Copied {{variant}}"
   }
 }

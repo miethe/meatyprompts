@@ -1,6 +1,24 @@
 import React from 'react';
-import { render, fireEvent, screen } from '@testing-library/react';
+import { render, fireEvent, screen, waitFor } from '@testing-library/react';
 import PromptDetailModal from '../PromptDetailModal';
+import { copyText } from '../../lib/clipboard';
+import { track } from '../../lib/analytics';
+
+jest.mock('../../lib/clipboard');
+jest.mock('../../lib/analytics');
+jest.mock('react-i18next', () => ({
+  useTranslation: () => ({
+    t: (key: string, opts?: any) => {
+      const translations: Record<string, string> = {
+        'copy.quick': 'Copy body',
+        'copy.menuTitle': 'Copy options',
+        'copy.body': 'Copy body',
+        'toast.copied': `Copied ${opts?.variant}`,
+      };
+      return translations[key] || key;
+    },
+  }),
+}));
 
 jest.mock('@uiw/react-codemirror', () => ({
   __esModule: true,
@@ -65,9 +83,8 @@ describe('PromptDetailModal', () => {
     );
   });
 
-  it('copies body to clipboard', () => {
-    const writeText = jest.fn().mockResolvedValue(undefined);
-    Object.assign(navigator, { clipboard: { writeText } });
+  it('copies body to clipboard', async () => {
+    (copyText as jest.Mock).mockResolvedValue(undefined);
     render(
       <PromptDetailModal
         prompt={basePrompt}
@@ -76,7 +93,8 @@ describe('PromptDetailModal', () => {
         onSave={() => {}}
       />
     );
-    fireEvent.click(screen.getByLabelText('Copy to clipboard'));
-    expect(writeText).toHaveBeenCalledWith('initial');
+    fireEvent.click(screen.getByLabelText('Copy body'));
+    await waitFor(() => expect(copyText).toHaveBeenCalledWith('initial'));
+    expect(track).toHaveBeenCalledWith('prompt_copied', expect.objectContaining({ variant: 'body', source: 'detail' }));
   });
 });
