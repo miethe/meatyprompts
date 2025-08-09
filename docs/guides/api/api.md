@@ -98,3 +98,22 @@ Creates a new lookup value for a given type. If the value already exists, the ex
 **Response:** (200 OK)
 
 Returns the created or existing lookup object.
+
+## Tags
+
+### GET /api/v1/tags
+
+Fetch the most commonly used tags, optionally filtered by a prefix.
+
+**Query Parameters:**
+
+* `query` (string, optional): Prefix to filter tags.
+* `limit` (integer, optional): Maximum number of tags to return. Defaults to 20.
+
+**Response:**
+
+```json
+[
+  {"tag": "example", "count": 5}
+]
+```

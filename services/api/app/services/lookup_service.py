@@ -1,5 +1,11 @@
 from sqlalchemy.orm import Session
-from ..models.lookup import ModelLookupORM, ToolLookupORM, PlatformLookupORM, PurposeLookupORM
+from sqlalchemy import func
+from ..models.lookup import (
+    ModelLookupORM,
+    ToolLookupORM,
+    PlatformLookupORM,
+    PurposeLookupORM,
+)
 from typing import Type, Union
 import uuid
 
@@ -22,14 +28,22 @@ async def list_lookup_values(db: Session, lookup_type: str):
     return db.query(table).all()
 
 async def create_lookup_value(db: Session, lookup_type: str, value: str):
-    table = get_lookup_table(lookup_type)
+    """Create a lookup entry or return the existing case-insensitive match."""
 
-    # Check if the value already exists
-    existing_value = db.query(table).filter(table.value == value).first()
+    table = get_lookup_table(lookup_type)
+    cleaned = value.strip()
+    if not (1 <= len(cleaned) <= 64):
+        raise ValueError("value must be between 1 and 64 characters")
+
+    existing_value = (
+        db.query(table)
+        .filter(func.lower(table.value) == cleaned.lower())
+        .first()
+    )
     if existing_value:
         return existing_value
 
-    new_value = table(id=uuid.uuid4(), value=value)
+    new_value = table(id=uuid.uuid4(), value=cleaned)
     db.add(new_value)
     db.commit()
     db.refresh(new_value)

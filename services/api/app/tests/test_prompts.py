@@ -33,6 +33,19 @@ def test_create_prompt():
     assert mock_db.refresh.call_count == 2
 
 
+def test_create_prompt_normalizes_tags():
+    mock_db = MagicMock(spec=Session)
+    prompt_data = PromptCreate(
+        title="T",
+        body="B",
+        use_cases=["u"],
+        access_control="private",
+        tags=[" Alpha ", "beta", "alpha"],
+    )
+    prompt = create_prompt(mock_db, prompt_data, owner_id=uuid.uuid4())
+    assert prompt.tags == ["alpha", "beta"]
+
+
 def test_missing_required_fields():
     with pytest.raises(ValidationError):
         PromptCreate(title="T", body="B", use_cases=["a"])
@@ -131,12 +144,56 @@ def test_update_prompt_updates_fields():
         body="new",
         use_cases=["y"],
         access_control="private",
+        tags=["New"],
     )
     result = update_prompt(mock_db, prompt_id, update)
 
     assert result.body == "new"
     assert result.use_cases == ["y"]
+    assert result.tags == ["new"]
+    assert header.tags == ["new"]
     assert latest_version.version == "1"
+
+
+def test_update_prompt_updates_header_tags():
+    mock_db = MagicMock(spec=Session)
+    prompt_id = uuid.uuid4()
+
+    latest_version = PromptVersionORM(
+        id=uuid.uuid4(),
+        prompt_id=prompt_id,
+        version="1",
+        body="b",
+        access_control="private",
+        use_cases=["x"],
+        created_at=datetime.utcnow(),
+        updated_at=datetime.utcnow(),
+    )
+    header = PromptHeaderORM(
+        id=prompt_id,
+        owner_id=uuid.uuid4(),
+        title="t",
+        tags=["old"],
+        created_at=datetime.utcnow(),
+        updated_at=datetime.utcnow(),
+    )
+
+    query_version = MagicMock()
+    query_header = MagicMock()
+    mock_db.query.side_effect = [query_version, query_header]
+    query_version.filter.return_value.order_by.return_value.first.return_value = latest_version
+    query_header.filter.return_value.first.return_value = header
+
+    update = PromptCreate(
+        title="t",
+        body="b",
+        use_cases=["x"],
+        access_control="private",
+        tags=["new", "New"],
+    )
+    result = update_prompt(mock_db, prompt_id, update)
+    assert result.tags == ["new"]
+    assert header.tags == ["new"]
 
 
 def test_update_prompt_not_found():
