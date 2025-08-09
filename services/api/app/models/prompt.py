@@ -95,6 +95,15 @@ class Prompt(PromptBase):
     }
 
 
+class PromptListResponse(BaseModel):
+    """Paginated response model for ``GET /prompts``."""
+
+    items: List[Prompt]
+    next_cursor: Optional[str] = None
+    count: int
+    total_estimate: Optional[int] = None
+
+
 class PromptHeaderORM(Base):
     """ORM model for the prompts table containing prompt level fields."""
 

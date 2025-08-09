@@ -7,17 +7,19 @@ import logging
 import time
 import uuid
 import re
-from typing import List
+from typing import List, Optional
 from uuid import UUID
 
-from sqlalchemy.orm import Query, Session
+from sqlalchemy.orm import Session
 
 from app.models.prompt import (
     Prompt,
     PromptCreate,
     PromptHeaderORM,
     PromptVersionORM,
+    PromptListResponse,
 )
+from app.services import search_service
 
 logger = logging.getLogger(__name__)
 
@@ -156,37 +158,54 @@ def create_prompt(db: Session, prompt: PromptCreate, owner_id: UUID) -> Prompt:
 
 def list_prompts(
     db: Session,
-    model: str | None = None,
-    provider: str | None = None,
-    use_case: str | None = None,
-) -> List[Prompt]:
-    """List prompts applying optional filters."""
+    owner_id: UUID,
+    q: str | None = None,
+    tags: List[str] | None = None,
+    favorite: bool | None = None,
+    archived: bool | None = None,
+    target_models: List[str] | None = None,
+    providers: List[str] | None = None,
+    purposes: List[str] | None = None,
+    collection_id: UUID | None = None,
+    sort: str = search_service.SearchSort.updated_desc.value,
+    limit: int = 20,
+    after: str | None = None,
+) -> PromptListResponse:
+    """List prompts for an owner applying search, filters and pagination."""
 
-    query: Query[PromptVersionORM] = db.query(PromptVersionORM).join(PromptHeaderORM)
-
-    if model:
-        query = query.filter(PromptVersionORM.target_models.any(model))
-    if provider:
-        query = query.filter(PromptVersionORM.providers.any(provider))
-    if use_case:
-        query = query.filter(PromptVersionORM.use_cases.any(use_case))
-
-    orm_objs: List[PromptVersionORM] = (
-        query.order_by(PromptVersionORM.created_at.desc()).all()
+    norm_tags = _normalize_tags(tags) if tags else None
+    norm_models = _normalize_models(target_models) if target_models else None
+    filters = search_service.SearchFilters(
+        owner_id=owner_id,
+        q=q,
+        tags=norm_tags,
+        favorite=favorite,
+        archived=archived,
+        target_models=norm_models,
+        providers=providers,
+        purposes=purposes,
+        collection_id=collection_id,
+        sort=search_service.SearchSort(sort),
+        limit=limit,
+        after=after,
     )
-    prompt_ids = [obj.prompt_id for obj in orm_objs]
-    headers: List[PromptHeaderORM] = (
-        db.query(PromptHeaderORM).filter(PromptHeaderORM.id.in_(prompt_ids)).all()
-    )
-    header_map = {header.id: header for header in headers}
-
-    logger.info("prompts.list", extra={"user_id": "unknown"})
-
-    return [
-        _to_prompt(orm_obj, header_map[orm_obj.prompt_id])
-        for orm_obj in orm_objs
-        if orm_obj.prompt_id in header_map
+    query = search_service.build_query(db, filters)
+    rows = query.all()
+    items = [
+        _to_prompt(version, header)
+        for version, header in rows[: filters.limit]
     ]
+    next_cursor: str | None = None
+    if len(rows) > filters.limit:
+        next_cursor = search_service.encode_cursor(rows[filters.limit - 1], filters.sort)
+
+    logger.info(
+        "prompts.list", extra={"user_id": str(owner_id), "count": len(items)}
+    )
+
+    return PromptListResponse(
+        items=items, next_cursor=next_cursor, count=len(items), total_estimate=None
+    )
 
 
 def get_prompt_by_id(db: Session, prompt_id: UUID) -> Prompt | None:
