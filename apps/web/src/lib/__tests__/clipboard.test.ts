@@ -9,8 +9,10 @@ describe('copyText', () => {
   });
 
   it('falls back to execCommand when clipboard API missing', async () => {
-    // @ts-ignore
-    navigator.clipboard = undefined;
+    Object.defineProperty(navigator, 'clipboard', {
+      value: undefined,
+      configurable: true,
+    });
     (document as any).execCommand = () => true;
     const execSpy = jest.spyOn(document, 'execCommand');
     const appendChild = jest.spyOn(document.body, 'appendChild');

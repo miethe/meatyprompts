@@ -41,7 +41,12 @@ const CopyMenu: React.FC<CopyMenuProps> = ({ prompt, source }) => {
   };
 
   return (
-    <div className="relative inline-block text-left" onClick={(e) => e.stopPropagation()}>
+    <div
+      className="relative inline-block text-left"
+      role="group"
+      aria-label={t('copy.menuGroup')}
+      onClick={(e) => e.stopPropagation()}
+    >
       <button
         aria-label={t('copy.quick')}
         onClick={() => handleCopy('body')}
@@ -59,7 +64,7 @@ const CopyMenu: React.FC<CopyMenuProps> = ({ prompt, source }) => {
       {open && (
         <div
           role="menu"
-          className="absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none z-10"
+          className="absolute right-0 mt-2 w-52 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none z-10 dark:text-gray-400 text-gray-700"
         >
           <button
             role="menuitem"

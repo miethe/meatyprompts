@@ -123,6 +123,9 @@ const ManualPromptForm = ({ onClose, readOnly = false }: ManualPromptFormProps) 
     console.log('ManualPromptForm submitted:', data);
     try {
       await createPrompt(data);
+      try {
+        localStorage.removeItem('draft:prompt:new');
+      } catch {}
       onClose();
     } catch (error) {
       console.error('Failed to create prompt:', error);
