@@ -2,7 +2,11 @@
 const nextConfig = {
   reactStrictMode: true,
   experimental: {
-    appDir: true
+    turbo: {}, // enable Turbopack with default options
+  },
+  onDemandEntries: {
+    maxInactiveAge: 15 * 60 * 1000, // 15 minutes
+    pagesBufferLength: 8 // keep more pages in memory
   }
 };
 
