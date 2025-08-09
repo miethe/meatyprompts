@@ -13,7 +13,7 @@ interface MarkdownEditorProps {
 }
 
 const MarkdownEditor: React.FC<MarkdownEditorProps> = ({ value, onChange, onSave }) => {
-  const editorRef = useRef<CodeMirror>(null);
+  const editorRef = useRef<any>(null);
   const [showPreview, setShowPreview] = useState(true);
   const [dirty, setDirty] = useState(false);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -80,14 +80,14 @@ const MarkdownEditor: React.FC<MarkdownEditorProps> = ({ value, onChange, onSave
 
   return (
     <div className="border rounded">
-      <div className="flex items-center border-b p-2 space-x-2">
+      <div className="flex items-center border-b p-2 space-x-2 text-gray-700">
         <button type="button" aria-label="Bold" onClick={() => applyFormat('**')}><b>B</b></button>
         <button type="button" aria-label="Italic" onClick={() => applyFormat('*')}><i>I</i></button>
-        <button type="button" aria-label="Heading" onClick={() => applyFormat('# ' ,'')}><span className="font-bold">H</span></button>
+        <button type="button" aria-label="Heading" onClick={() => applyFormat('# ', '')}><span className="font-bold">H</span></button>
         <button type="button" aria-label="Link" onClick={() => applyFormat('[', '](url)')}>🔗</button>
         <button type="button" aria-label="Code" onClick={() => applyFormat('`')}>{'{'}code{'}'}</button>
-        <button type="button" aria-label="OL" onClick={() => applyFormat('1. ' ,'')}>&#35;.</button>
-        <button type="button" aria-label="UL" onClick={() => applyFormat('- ' ,'')}>•</button>
+        <button type="button" aria-label="OL" onClick={() => applyFormat('1. ', '')}>&#35;.</button>
+        <button type="button" aria-label="UL" onClick={() => applyFormat('- ', '')}>•</button>
         <span className="ml-auto text-sm" aria-label="dirty-state">{dirty ? '● Unsaved' : 'Saved'}</span>
       </div>
       <div className="flex">
@@ -102,7 +102,7 @@ const MarkdownEditor: React.FC<MarkdownEditorProps> = ({ value, onChange, onSave
           />
         </div>
         {showPreview && (
-          <div className="w-1/2 p-2 overflow-auto prose max-w-none" aria-label="preview">
+          <div className="w-1/2 p-2 overflow-auto prose max-w-none text-black" aria-label="preview">
             <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeSanitize]}>
               {value}
             </ReactMarkdown>
