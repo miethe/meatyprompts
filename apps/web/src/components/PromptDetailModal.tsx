@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import CodeEditor from './CodeEditor';
 import MarkdownEditor from './editor/MarkdownEditor';
-import CopyIconButton from './common/CopyIconButton';
+import CopyMenu from './common/CopyMenu';
 import {
   Dialog,
   DialogContent,
@@ -63,7 +63,7 @@ const PromptDetailModal: React.FC<PromptDetailModalProps> = ({ prompt, isOpen, o
             {isEditing ? (
               <div className="col-span-3">
                 <div className="flex items-center mb-2">
-                  <CopyIconButton text={editedPrompt.body} />
+                  <CopyMenu prompt={editedPrompt as any} source="detail" />
                 </div>
                 <MarkdownEditor
                   value={editedPrompt.body}
@@ -73,7 +73,7 @@ const PromptDetailModal: React.FC<PromptDetailModalProps> = ({ prompt, isOpen, o
             ) : (
               <div className="col-span-3 flex items-start">
                 <p className="whitespace-pre-wrap flex-1">{prompt.body}</p>
-                <CopyIconButton text={prompt.body} />
+                <CopyMenu prompt={prompt as any} source="detail" />
               </div>
             )}
           </div>

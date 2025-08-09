@@ -4,6 +4,13 @@ import ManualPromptForm from '../forms/ManualPromptForm';
 const NewPromptModal = ({ onClose }) => {
   const [step, setStep] = useState(0);
 
+  const handleClose = () => {
+    try {
+      localStorage.removeItem('draft:prompt:new');
+    } catch {}
+    onClose();
+  };
+
   const renderStep = () => {
     switch (step) {
       case 0:
@@ -25,7 +32,7 @@ const NewPromptModal = ({ onClose }) => {
           </div>
         );
       case 1:
-        return <ManualPromptForm onClose={onClose} />;
+        return <ManualPromptForm onClose={handleClose} />;
       default:
         return null;
     }
@@ -36,7 +43,7 @@ const NewPromptModal = ({ onClose }) => {
       <div className="w-full max-w-md p-6 bg-white rounded-lg shadow-lg">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-xl font-bold text-black">New Prompt</h2>
-          <button onClick={onClose} className="text-gray-500 hover:text-gray-700">
+          <button onClick={handleClose} className="text-gray-500 hover:text-gray-700">
             &times;
           </button>
         </div>

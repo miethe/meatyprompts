@@ -1,5 +1,5 @@
 import React from 'react';
-import CopyIconButton from './common/CopyIconButton';
+import CopyMenu from './common/CopyMenu';
 import { Prompt } from '@/types/Prompt';
 
 interface PromptCardProps {
@@ -27,7 +27,7 @@ const PromptCard: React.FC<PromptCardProps> = ({ prompt, onClick, onDuplicate })
         <h3 className="text-lg font-bold text-white truncate">{prompt.title}</h3>
         <div className="flex items-start mt-1">
           <p className="text-sm text-gray-400 truncate flex-1">{firstLine}</p>
-          <CopyIconButton text={prompt.body} />
+          <CopyMenu prompt={prompt as any} source="card" />
         </div>
         <div className="mt-4 flex flex-wrap gap-2">
           {allTags.slice(0, 4).map((tag, index) => (
