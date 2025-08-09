@@ -45,10 +45,20 @@ The Phase-1 database schema stores prompt metadata and versioned content.
 | updated_at | timestamptz | Last update |
 
 ## collections
-Stores user-defined groupings of prompts.
+| Column | Type | Notes |
+| --- | --- | --- |
+| id | UUID | Primary key |
+| owner_id | UUID | FK to `users.id` |
+| name | text | Unique per owner |
+| created_at | timestamptz | Creation timestamp |
+| updated_at | timestamptz | Last update (indexed with `owner_id`) |
 
 ## collection_prompts
-Bridge table mapping prompts to collections.
+| Column | Type | Notes |
+| --- | --- | --- |
+| collection_id | UUID | FK to `collections.id` (cascade delete) |
+| prompt_id | UUID | FK to `prompts.id` (cascade delete) |
+Primary key is `(collection_id, prompt_id)`.
 
 ## share_tokens
 Unique tokens that allow read-only sharing of prompts.

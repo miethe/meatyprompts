@@ -73,14 +73,16 @@ def upgrade() -> None:
         sa.Column('updated_at', sa.TIMESTAMP(timezone=True), server_default=sa.text('now()'), nullable=False),
         sa.UniqueConstraint('owner_id', 'name', name='uq_collections_owner_name'),
     )
-    op.create_index('ix_collections_owner_name', 'collections', ['owner_id', 'name'])
+    op.create_index('ix_collections_owner_name', 'collections', ['owner_id', 'name'], unique=True)
+    op.create_index('ix_collections_owner_updated', 'collections', ['owner_id', sa.text('updated_at DESC')])
 
     op.create_table(
         'collection_prompts',
         sa.Column('collection_id', sa.dialects.postgresql.UUID(), sa.ForeignKey('collections.id', ondelete='CASCADE'), primary_key=True),
         sa.Column('prompt_id', sa.dialects.postgresql.UUID(), sa.ForeignKey('prompts.id', ondelete='CASCADE'), primary_key=True),
     )
-    op.create_index('ix_collection_prompts_prompt_id', 'collection_prompts', ['prompt_id', 'collection_id'])
+    op.create_index('ix_collection_prompts_prompt', 'collection_prompts', ['prompt_id'])
+    op.create_index('ix_collection_prompts_collection', 'collection_prompts', ['collection_id'])
 
     op.create_table(
         'share_tokens',
@@ -94,9 +96,11 @@ def upgrade() -> None:
 
 def downgrade() -> None:
     op.drop_table('share_tokens')
-    op.drop_index('ix_collection_prompts_prompt_id', table_name='collection_prompts')
+    op.drop_index('ix_collection_prompts_prompt', table_name='collection_prompts')
+    op.drop_index('ix_collection_prompts_collection', table_name='collection_prompts')
     op.drop_table('collection_prompts')
     op.drop_index('ix_collections_owner_name', table_name='collections')
+    op.drop_index('ix_collections_owner_updated', table_name='collections')
     op.drop_table('collections')
 
     op.drop_index('ix_prompt_versions_body_trgm', table_name='prompt_versions')
