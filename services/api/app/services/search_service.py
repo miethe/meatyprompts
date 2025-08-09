@@ -130,7 +130,7 @@ def build_query(db: Session, filters: SearchFilters) -> Query:
             )
         )
     if filters.tags:
-        query = query.filter(PromptHeaderORM.tags.contains(filters.tags))
+        query = query.filter(PromptHeaderORM.tags.op('@>')(filters.tags))
     if filters.favorite is not None:
         query = query.filter(PromptHeaderORM.is_favorite == filters.favorite)
     if filters.archived is not None:
