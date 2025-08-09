@@ -1,13 +1,6 @@
 import React from 'react';
 import CopyIconButton from './common/CopyIconButton';
-
-// Assuming a Prompt type, which should be defined in your types folder
-interface Prompt {
-  title: string;
-  body: string;
-  version: string;
-  tags?: string[];
-}
+import { Prompt } from '@/types/Prompt';
 
 interface PromptCardProps {
   prompt: Prompt;

@@ -11,17 +11,7 @@ import {
   DialogFooter,
 } from './ui/dialog'; // Assuming shadcn dialog is in ui/dialog
 import { Button } from './ui/button'; // Assuming shadcn button is in ui/button
-
-// Simplified Prompt type used by this component
-interface Prompt {
-  title: string;
-  body: string;
-  output_format?: string;
-  sample_input?: Record<string, unknown>;
-  sample_output?: Record<string, unknown>;
-  related_prompt_ids?: string[];
-  link?: string;
-}
+import { Prompt } from '@/types/Prompt';
 
 interface PromptDetailModalProps {
   prompt: Prompt;
