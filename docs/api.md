@@ -1,7 +1,7 @@
 # API Overview
 
 Copying prompts as JSON produces the same structure returned by `GET /prompts`.
-No additional API endpoints were added for this feature.
+Additional endpoints support bulk import and export of prompts.
 
 ## GET /prompts
 
@@ -77,3 +77,15 @@ Operation is idempotent and returns `{ "ok": true }`.
 
 Remove a prompt from a collection. Responds with `204` even if the
 membership does not exist.
+
+## POST /import
+
+Upload a CSV or JSON file containing prompts. Form fields provide the mapping
+between columns and prompt fields. When `dry_run=true` (default) the endpoint
+returns a preview of validation results. Set `dry_run=false` to create
+prompts.
+
+## GET /export
+
+Stream the current user's prompts as a JSON array. Use the optional
+`collection_id` query parameter to restrict the export to a single collection.

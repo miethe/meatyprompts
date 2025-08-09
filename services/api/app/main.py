@@ -40,11 +40,12 @@ def create_app() -> FastAPI:
         value = tenant.scalar()
         return {"tenant_id": str(value) if value else None}
 
-    from app.api import auth, prompts, collections
+    from app.api import auth, prompts, collections, imex
     from app.api.endpoints import lookups, metadata, tags
     app.include_router(auth.router)
     app.include_router(prompts.router, prefix="/api/v1")
     app.include_router(collections.router, prefix="/api/v1")
+    app.include_router(imex.router, prefix="/api/v1")
     app.include_router(lookups.router, prefix="/api/v1/lookups", tags=["lookups"])
     app.include_router(metadata.router, prefix="/api/v1/metadata", tags=["metadata"])
     app.include_router(tags.router, prefix="/api/v1/tags", tags=["tags"])
