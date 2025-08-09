@@ -1,6 +1,6 @@
 from datetime import datetime
 import uuid
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, patch
 
 import pytest
 from pydantic import ValidationError
@@ -36,6 +36,11 @@ def test_create_prompt():
 def test_missing_required_fields():
     with pytest.raises(ValidationError):
         PromptCreate(title="T", body="B", use_cases=["a"])
+
+
+def test_empty_body_validation():
+    with pytest.raises(ValidationError):
+        PromptCreate(title="T", body="", use_cases=["a"], access_control="private")
 
 def test_list_prompts_with_filters():
     mock_db = MagicMock(spec=Session)
@@ -137,6 +142,48 @@ def test_update_prompt_updates_fields():
     assert result.body == "new"
     assert result.use_cases == ["y"]
     assert latest_version.version == "1"
+
+
+def test_update_prompt_logs_event():
+    mock_db = MagicMock(spec=Session)
+    prompt_id = uuid.uuid4()
+
+    latest_version = PromptVersionORM(
+        id=uuid.uuid4(),
+        prompt_id=prompt_id,
+        version="1",
+        body="old",
+        access_control="private",
+        use_cases=["x"],
+        created_at=datetime.utcnow(),
+        updated_at=datetime.utcnow(),
+    )
+    header = PromptHeaderORM(
+        id=prompt_id,
+        title="title",
+        tags=["t"],
+        created_at=datetime.utcnow(),
+        updated_at=datetime.utcnow(),
+    )
+
+    query_version = MagicMock()
+    query_header = MagicMock()
+    mock_db.query.side_effect = [query_version, query_header]
+    query_version.filter.return_value.order_by.return_value.first.return_value = latest_version
+    query_header.filter.return_value.first.return_value = header
+
+    update = PromptCreate(
+        title="title",
+        body="new",
+        use_cases=["y"],
+        access_control="private",
+    )
+
+    with patch("app.services.prompt_service.logger") as mock_logger:
+        update_prompt(mock_db, prompt_id, update)
+        assert mock_logger.info.call_count >= 2
+        event_call = [c for c in mock_logger.info.call_args_list if c.args[0] == "events.prompt_edited"]
+        assert event_call
 
 
 def test_update_prompt_not_found():

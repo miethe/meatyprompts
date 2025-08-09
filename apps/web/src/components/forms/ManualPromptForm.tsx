@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -7,7 +7,8 @@ import { usePrompt } from '@/contexts/PromptContext';
 import CreatableMultiSelect from '../form/CreatableMultiSelect';
 import TagInput from '../form/TagInput';
 import { useLookups } from '@/contexts/LookupContext';
-import CodeEditor, { LANGUAGE_OPTIONS, Language } from '../CodeEditor';
+import CodeEditor, { Language } from '../CodeEditor';
+import MarkdownEditor from '../editor/MarkdownEditor';
 import { useFieldHelp } from '@/contexts/FieldHelpContext';
 import RadixTooltip from '../ui/RadixTooltip';
 import LanguageSelect from '../form/LanguageSelect';
@@ -98,15 +99,25 @@ const ManualPromptForm = ({ onClose, readOnly = false }: ManualPromptFormProps) 
       link: '',
       access_control: 'public',
       body: '',
-      output_format: 'plaintext',
+      output_format: 'markdown',
       sample_input_language: 'json',
       sample_output_language: 'json',
     }
   });
 
-  const [language, setLanguage] = useState<Language>(control._defaultValues.output_format || 'plaintext');
   const [sampleInputLanguage, setSampleInputLanguage] = useState<Language>(control._defaultValues.sample_input_language || 'json');
   const [sampleOutputLanguage, setSampleOutputLanguage] = useState<Language>(control._defaultValues.sample_output_language || 'json');
+
+  useEffect(() => {
+    try {
+      const draft = localStorage.getItem('draft:prompt:new');
+      if (draft) {
+        setValue('body', draft);
+      }
+    } catch {
+      // ignore storage errors
+    }
+  }, [setValue]);
 
   const onSubmit = async (data: ManualPromptInput) => {
     console.log('ManualPromptForm submitted:', data);
@@ -150,23 +161,23 @@ const ManualPromptForm = ({ onClose, readOnly = false }: ManualPromptFormProps) 
             <label htmlFor="body" className="block text-sm font-medium text-gray-700">
               {t('form.promptText')}
             </label>
-            <LanguageSelect
-              value={language}
-              onChange={(lang) => {
-                setLanguage(lang);
-                setValue('output_format', lang);
-              }}
-              disabled={readOnly}
-            />
             <Controller
               name="body"
               control={control}
               render={({ field }) => (
-                <CodeEditor
+                <MarkdownEditor
                   value={field.value}
-                  language={language}
-                  onChange={field.onChange}
-                  readOnly={readOnly}
+                  onChange={(val) => {
+                    field.onChange(val);
+                  }}
+                  onSave={(val) => {
+                    field.onChange(val);
+                    try {
+                      localStorage.setItem('draft:prompt:new', val);
+                    } catch {
+                      // ignore storage errors
+                    }
+                  }}
                 />
               )}
             />

@@ -7,6 +7,14 @@ jest.mock('../../CodeEditor', () => {
   };
 });
 
+jest.mock('../../editor/MarkdownEditor', () => {
+  const React = require('react');
+  return {
+    __esModule: true,
+    default: (props: any) => React.createElement('textarea', { 'data-testid': 'mdeditor', readOnly: props.readOnly }),
+  };
+});
+
 jest.mock('../../form/TagInput', () => {
   const React = require('react');
   return () => React.createElement('div');
@@ -46,7 +54,7 @@ describe('ManualPromptForm', () => {
   it('renders field help tooltips', () => {
     render(React.createElement(ManualPromptForm, { onClose: () => {} }));
     expect(screen.getAllByLabelText('Information')).toHaveLength(3);
-    expect(screen.getAllByTestId('codemirror')).toHaveLength(1);
+    expect(screen.getAllByTestId('mdeditor')).toHaveLength(1);
     fireEvent.click(screen.getByText('Advanced'));
     expect(screen.getAllByTestId('codemirror')).toHaveLength(2);
   });
