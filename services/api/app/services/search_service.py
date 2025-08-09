@@ -12,6 +12,7 @@ from sqlalchemy import and_, asc, desc, func, or_
 from sqlalchemy.orm import Query, Session
 
 from app.models.prompt import PromptHeaderORM, PromptVersionORM
+from app.models.collection import CollectionPromptORM
 
 
 class SearchSort(str, Enum):
@@ -143,7 +144,11 @@ def build_query(db: Session, filters: SearchFilters) -> Query:
         query = query.filter(PromptVersionORM.providers.contains(filters.providers))
     if filters.purposes:
         query = query.filter(PromptVersionORM.use_cases.contains(filters.purposes))
-    # collection filter to be implemented when collections are available
+    if filters.collection_id:
+        query = query.join(
+            CollectionPromptORM,
+            CollectionPromptORM.prompt_id == PromptHeaderORM.id,
+        ).filter(CollectionPromptORM.collection_id == filters.collection_id)
 
     query = _apply_after_clause(query, filters)
 
