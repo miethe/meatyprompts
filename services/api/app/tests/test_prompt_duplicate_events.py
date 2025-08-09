@@ -6,8 +6,7 @@ from datetime import datetime
 import sys
 import uuid
 from pathlib import Path
-BASE_DIR = Path(__file__).resolve().parents[2]
-sys.path.insert(0, str(BASE_DIR))
+
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -21,8 +20,22 @@ from typing import Generator
 from app.models.prompt import PromptHeaderORM, PromptVersionORM
 from app.services.prompt_service import duplicate_prompt
 
-TEST_DB = "postgresql://test_user:password@/meatyprompts"
+from services.api.app.core.config import settings
 
+TEST_DB = settings.DATABASE_URL_TEST
+if not TEST_DB:
+    raise RuntimeError("DATABASE_URL_TEST is not set in the environment or .env file.")
+
+def find_project_root(marker: str = "alembic.ini") -> Path:
+    """Search parent directories for a given marker file and return its directory."""
+    current: Path = Path(__file__).resolve()
+    for parent in [current] + list(current.parents):
+        if (parent / marker).is_file():
+            return parent
+    raise FileNotFoundError(f"Could not find {marker} in any parent directory of {__file__}")
+
+BASE_DIR: Path = find_project_root()
+sys.path.insert(0, str(BASE_DIR))
 
 def run_migrations() -> None:
     """Apply all alembic migrations."""
@@ -96,6 +109,8 @@ def test_latest_version_lookup_performance(engine: Engine) -> None:
     """Latest-version lookup should be indexed and under p95 latency."""
     prompt_uuid = "11111111-1111-1111-1111-111111111111"
     user_uuid = "00000000-0000-0000-0000-000000000000"
+    p95_max_ms = 150.0
+
     with engine.begin() as conn:
         conn.execute(
             text(
@@ -127,4 +142,4 @@ def test_latest_version_lookup_performance(engine: Engine) -> None:
     assert any("ix_prompt_versions_prompt_desc" in row[0] for row in plan)
     exec_line = next(row[0] for row in plan if "Execution Time" in row[0])
     exec_ms = float(exec_line.split("Execution Time: ")[1].split(" ms")[0])
-    assert exec_ms < 150.0
+    assert exec_ms < p95_max_ms
