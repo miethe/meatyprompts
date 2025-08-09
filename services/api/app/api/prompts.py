@@ -101,3 +101,18 @@ def update_existing_prompt(
     if updated_prompt is None:
         raise HTTPException(status_code=404, detail="Prompt not found")
     return updated_prompt
+
+
+@router.post(
+    "/prompts/{prompt_id}/duplicate",
+    response_model=Prompt,
+    status_code=201,
+    dependencies=[Depends(csrf_protect)],
+)
+def duplicate_prompt(prompt_id: uuid.UUID, db: Session = Depends(get_db)):
+    """Duplicate an existing prompt by creating a new version."""
+
+    new_prompt = prompt_service.duplicate_prompt(db=db, prompt_id=prompt_id)
+    if new_prompt is None:
+        raise HTTPException(status_code=404, detail="Prompt not found")
+    return new_prompt

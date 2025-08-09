@@ -234,6 +234,88 @@ def get_prompt_by_id(db: Session, prompt_id: UUID) -> Prompt | None:
     return _to_prompt(version, header)
 
 
+def duplicate_prompt(db: Session, prompt_id: UUID) -> Prompt | None:
+    """Create a new version of a prompt by duplicating the latest version."""
+
+    start = time.perf_counter()
+
+    latest_version: PromptVersionORM | None = (
+        db.query(PromptVersionORM)
+        .filter(PromptVersionORM.prompt_id == prompt_id)
+        .order_by(PromptVersionORM.version.desc())
+        .first()
+    )
+    if latest_version is None:
+        return None
+
+    header: PromptHeaderORM | None = (
+        db.query(PromptHeaderORM)
+        .filter(PromptHeaderORM.id == prompt_id)
+        .first()
+    )
+    if header is None:
+        return None
+
+    try:
+        new_version = str(int(latest_version.version) + 1)
+    except ValueError:
+        logger.warning(
+            "prompts.duplicate.non_numeric_version",
+            extra={"prompt_id": str(prompt_id), "version": latest_version.version},
+        )
+        new_version = "1"
+
+    version_copy = PromptVersionORM(
+        id=uuid.uuid4(),
+        prompt_id=prompt_id,
+        version=new_version,
+        body=latest_version.body,
+        access_control=latest_version.access_control,
+        target_models=latest_version.target_models,
+        providers=latest_version.providers,
+        integrations=latest_version.integrations,
+        use_cases=latest_version.use_cases,
+        category=latest_version.category,
+        complexity=latest_version.complexity,
+        audience=latest_version.audience,
+        status=latest_version.status,
+        input_schema=latest_version.input_schema,
+        output_format=latest_version.output_format,
+        llm_parameters=latest_version.llm_parameters,
+        success_metrics=latest_version.success_metrics,
+        sample_input=latest_version.sample_input,
+        sample_output=latest_version.sample_output,
+        related_prompt_ids=latest_version.related_prompt_ids,
+        link=latest_version.link,
+        created_at=datetime.utcnow(),
+        updated_at=datetime.utcnow(),
+    )
+    db.add(version_copy)
+
+    base_title = re.sub(r"\s\(v[^\)]+\)$", "", header.title)
+    header.title = f"{base_title} (v{new_version})"
+    header.updated_at = datetime.utcnow()
+
+    db.commit()
+    db.refresh(version_copy)
+    db.refresh(header)
+
+    elapsed_ms = (time.perf_counter() - start) * 1000
+    logger.info(
+        "prompts.duplicate",
+        extra={"prompt_id": str(prompt_id), "user_id": "unknown"},
+    )
+    logger.info(
+        "events.prompt_duplicated",
+        extra={
+            "prompt_id": str(prompt_id),
+            "new_version": new_version,
+            "elapsed_ms": round(elapsed_ms, 2),
+        },
+    )
+    return _to_prompt(version_copy, header)
+
+
 def update_prompt(db: Session, prompt_id: UUID, prompt_update: PromptCreate) -> Prompt | None:
     """Update the latest version of a prompt without version bump."""
 

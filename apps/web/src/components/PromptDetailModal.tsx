@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import CodeEditor from './CodeEditor';
 import MarkdownEditor from './editor/MarkdownEditor';
-import CopyIconButton from './common/CopyIconButton';
+import CopyMenu from './common/CopyMenu';
 import {
   Dialog,
   DialogContent,
@@ -11,26 +11,17 @@ import {
   DialogFooter,
 } from './ui/dialog'; // Assuming shadcn dialog is in ui/dialog
 import { Button } from './ui/button'; // Assuming shadcn button is in ui/button
-
-// Simplified Prompt type used by this component
-interface Prompt {
-  title: string;
-  body: string;
-  output_format?: string;
-  sample_input?: Record<string, unknown>;
-  sample_output?: Record<string, unknown>;
-  related_prompt_ids?: string[];
-  link?: string;
-}
+import { Prompt } from '@/types/Prompt';
 
 interface PromptDetailModalProps {
   prompt: Prompt;
   isOpen: boolean;
   onClose: () => void;
   onSave: (updatedPrompt: Prompt) => void;
+  onDuplicate?: () => void;
 }
 
-const PromptDetailModal: React.FC<PromptDetailModalProps> = ({ prompt, isOpen, onClose, onSave }) => {
+const PromptDetailModal: React.FC<PromptDetailModalProps> = ({ prompt, isOpen, onClose, onSave, onDuplicate }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [editedPrompt, setEditedPrompt] = useState<Prompt>(prompt);
 
@@ -72,7 +63,7 @@ const PromptDetailModal: React.FC<PromptDetailModalProps> = ({ prompt, isOpen, o
             {isEditing ? (
               <div className="col-span-3">
                 <div className="flex items-center mb-2">
-                  <CopyIconButton text={editedPrompt.body} />
+                  <CopyMenu prompt={editedPrompt as any} source="detail" />
                 </div>
                 <MarkdownEditor
                   value={editedPrompt.body}
@@ -82,7 +73,7 @@ const PromptDetailModal: React.FC<PromptDetailModalProps> = ({ prompt, isOpen, o
             ) : (
               <div className="col-span-3 flex items-start">
                 <p className="whitespace-pre-wrap flex-1">{prompt.body}</p>
-                <CopyIconButton text={prompt.body} />
+                <CopyMenu prompt={prompt as any} source="detail" />
               </div>
             )}
           </div>
@@ -176,6 +167,9 @@ const PromptDetailModal: React.FC<PromptDetailModalProps> = ({ prompt, isOpen, o
           ) : (
             <>
               <Button variant="outline" onClick={onClose}>Close</Button>
+              {onDuplicate && (
+                <Button variant="outline" aria-label="Duplicate prompt" onClick={onDuplicate}>Duplicate</Button>
+              )}
               <Button variant="outline" onClick={() => setIsEditing(true)}>Edit</Button>
             </>
           )}
