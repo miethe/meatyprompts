@@ -22,6 +22,7 @@ const Tag: React.FC<{ children: React.ReactNode }> = ({ children }) => (
 
 const PromptCard: React.FC<PromptCardProps> = ({ prompt, onClick }) => {
   const allTags = prompt.tags || [];
+  const firstLine = prompt.body.split('\n')[0];
 
   return (
     <div
@@ -31,9 +32,7 @@ const PromptCard: React.FC<PromptCardProps> = ({ prompt, onClick }) => {
       <div>
         <h3 className="text-lg font-bold text-white truncate">{prompt.title}</h3>
         <div className="flex items-start mt-1">
-          <p className="text-sm text-gray-400 h-10 overflow-hidden text-ellipsis flex-1">
-            {prompt.body}
-          </p>
+          <p className="text-sm text-gray-400 truncate flex-1">{firstLine}</p>
           <CopyIconButton text={prompt.body} />
         </div>
         <div className="mt-4 flex flex-wrap gap-2">
