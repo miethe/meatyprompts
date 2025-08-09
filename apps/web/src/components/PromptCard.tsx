@@ -22,7 +22,7 @@ const Tag: React.FC<{ children: React.ReactNode }> = ({ children }) => (
 
 const PromptCard: React.FC<PromptCardProps> = ({ prompt, onClick }) => {
   const allTags = prompt.tags || [];
-  const firstLine = prompt.body.split('\n')[0];
+  const firstLine = (prompt.body ?? '').split('\n')[0];
 
   return (
     <div
